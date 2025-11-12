@@ -37,10 +37,28 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "corsheaders",
+    # Local apps
+    "users",
+    "agents",
+    "requirements",
+    "quotes",
+    "bookings",
+    "chat",
+    "notifications",
+    "paymentsdetails",
+    "reviews",
+    "media",
+    "pages",
+    "ai_assistant",
+    "admin_panel",
+    "amadeus", # Added Amadeus app
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -54,7 +72,7 @@ ROOT_URLCONF = "travel_marketplace.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / 'templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -121,3 +139,81 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Custom User Model
+AUTH_USER_MODEL = 'users.User'
+
+# Rest Framework Configuration
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+}
+
+# CORS Settings
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+# Media Files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Static Files Configuration
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
+
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+DEFAULT_FROM_EMAIL = 'noreply@travelmarketplace.com'
+
+# API Keys (to be moved to .env in production)
+AMADEUS_API_KEY = ''
+AMADEUS_API_SECRET = ''
+AMADEUS_ENVIRONMENT = 'test'  # 'test' or 'production'
+
+PAYPAL_CLIENT_ID = ''
+PAYPAL_CLIENT_SECRET = ''
+PAYPAL_MODE = 'sandbox'  # 'sandbox' or 'live'
+
+OPENAI_API_KEY = ''
+
+# Commission Settings
+AGENT_COMMISSION_RATE = 0.02  # 2%
+CUSTOMER_COMMISSION_RATE = 0.01  # 1%
+MINIMUM_PAYOUT_THRESHOLD = 1000.00  # Minimum amount for agent payout
+
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'debug.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}

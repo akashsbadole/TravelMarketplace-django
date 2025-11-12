@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% block title %}Register - Travel Marketplace{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <img class="mx-auto h-12 w-auto" src="https://picsum.photos/seed/logo/200/100.jpg" alt="Travel Marketplace" />
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Create your account
+            </h2>
+            <p class="mt-2 text-center text-sm text-gray-600">
+                Or
+                <a href="{% url 'users:login' %}" class="font-medium text-blue-600 hover:text-blue-500">
+                    sign in to your existing account
+                </a>
+            </p>
+        </div>
+
+        {% if messages %}
+        <div class="space-y-4">
+            {% for message in messages %}
+            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" class="mt-8 space-y-6" action="{% url 'users:register' %}">
+            {% csrf_token %}
+
+            <!-- User Type Selection -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    I am a
+                </label>
+                <div class="grid grid-cols-2 gap-4">
+                    <label class="relative">
+                        <input type="radio" name="user_type" value="customer" checked class="peer sr-only">
+                        <div class="p-4 border-2 rounded-lg cursor-pointer text-center peer-checked:border-blue-500 peer-checked:bg-blue-50 hover:bg-gray-50">
+                            <i class="fas fa-user text-2xl mb-2 text-gray-600 peer-checked:text-blue-600"></i>
+                            <div class="font-medium">Traveler</div>
+                            <div class="text-sm text-gray-500">Looking for travel services</div>
+                        </div>
+                    </label>
+                    <label class="relative">
+                        <input type="radio" name="user_type" value="agent" class="peer sr-only">
+                        <div class="p-4 border-2 rounded-lg cursor-pointer text-center peer-checked:border-blue-500 peer-checked:bg-blue-50 hover:bg-gray-50">
+                            <i class="fas fa-briefcase text-2xl mb-2 text-gray-600 peer-checked:text-blue-600"></i>
+                            <div class="font-medium">Travel Agent</div>
+                            <div class="text-sm text-gray-500">Providing travel services</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Personal Information -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-medium text-gray-900">Personal Information</h3>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="first_name" class="block text-sm font-medium text-gray-700">
+                            First Name
+                        </label>
+                        <div class="mt-1">
+                            <input id="first_name" name="first_name" type="text" required
+                                value="{{ form.first_name.value|default:'' }}"
+                                class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                                placeholder="First name">
+                        </div>
+                        {% if form.first_name.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.first_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div>
+                        <label for="last_name" class="block text-sm font-medium text-gray-700">
+                            Last Name
+                        </label>
+                        <div class="mt-1">
+                            <input id="last_name" name="last_name" type="text" required
+                                value="{{ form.last_name.value|default:'' }}"
+                                class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                                placeholder="Last name">
+                        </div>
+                        {% if form.last_name.errors %}
+                            <p class="mt-1 text-sm text-red-600">{{ form.last_name.errors.0 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">
+                        Email Address
+                    </label>
+                    <div class="mt-1">
+                        <input id="email" name="email" type="email" required
+                            value="{{ form.email.value|default:'' }}"
+                            class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                            placeholder="Enter your email">
+                    </div>
+                    {% if form.email.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="phone" class="block text-sm font-medium text-gray-700">
+                        Phone Number
+                    </label>
+                    <div class="mt-1">
+                        <input id="phone" name="phone" type="tel"
+                            value="{{ form.phone.value|default:'' }}"
+                            class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                            placeholder="Enter your phone number">
+                    </div>
+                    {% if form.phone.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.phone.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Account Information -->
+            <div class="space-y-4">
+                <h3 class="text-lg font-medium text-gray-900">Account Information</h3>
+                
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">
+                        Username
+                    </label>
+                    <div class="mt-1">
+                        <input id="username" name="username" type="text" required
+                            value="{{ form.username.value|default:'' }}"
+                            class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                            placeholder="Choose a username">
+                    </div>
+                    {% if form.username.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.username.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="password1" class="block text-sm font-medium text-gray-700">
+                        Password
+                    </label>
+                    <div class="mt-1">
+                        <input id="password1" name="password1" type="password" required
+                            class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                            placeholder="Create a password">
+                    </div>
+                    {% if form.password1.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.password1.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="password2" class="block text-sm font-medium text-gray-700">
+                        Confirm Password
+                    </label>
+                    <div class="mt-1">
+                        <input id="password2" name="password2" type="password" required
+                            class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                            placeholder="Confirm your password">
+                    </div>
+                    {% if form.password2.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.password2.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div>
+                <div class="flex items-center">
+                    <input id="agree_terms" name="agree_terms" type="checkbox" required
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 focus:border-blue-500 rounded">
+                    <label for="agree_terms" class="ml-2 block text-sm text-gray-900">
+                        I agree to the <a href="{% url 'pages:terms' %}" class="text-blue-600 hover:text-blue-500">Terms of Service</a> 
+                        and <a href="{% url 'pages:privacy' %}" class="text-blue-600 hover:text-blue-500">Privacy Policy</a>
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <button type="submit"
+                    class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    Create Account
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-6">
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300" aria-hidden="true"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-2 bg-gray-100 text-gray-900">Or register with</span>
+                </div>
+            </div>
+            
+            <div class="mt-6 grid grid-cols-2 gap-3">
+                <a href="#" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                    <span class="sr-only">Register with Google</span>
+                    <svg class="w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12.24 10.24 10.24c-3 0-4.42-2.69-9.5-10.24-9.5-2.69-9.5 2.69-6 0 6 0 6 0s6.42 6.24 6.24 6.24-2.69 9.5 9.5 2.69 6 0 6 0s-4.42-2.69-9.5-2.69-9.5zm0-3.76 0c-3.76 0-5.61 3.66-12.61 3.66-12.61s12.61-3.66-12.61-3.66-7.35 0 0-5.61 3.66-7.35c0 2.34 2.34-7.35 5.61 5.61 5.61-2.34 7.35 5.61 5.61-2.34 7.35zm5.61-3.66c0 2.34 0-6.46 3.32-12.84 3.32-12.84s12.84-3.32-12.84-3.32-7.08 0 0-6.46 3.32-7.08c0 2.98 2.98-7.08 5.46 5.46 5.46-2.98 7.08 5.46 5.46-2.98 7.08zm5.46 5.46c0 6.46 0 14.08 10.22 15.16 10.22 15.16 10.22s15.16-10.22 15.16 10.22-7.08 14.08 14.08-7.08 0 0-6.46 10.22-7.08c0 4.72 4.72-14.08 5.46 5.46 14.08 5.46 5.46-4.72 14.08z"/>
+                    </svg>
+                </a>
+
+                <a href="#" class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                    <span class="sr-only">Register with Facebook</span>
+                    <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,450 @@
+{% extends 'base.html' %} {% block title %}Compare Quotes - Travel Marketplace{%
+endblock %} {% block content %}
+<div class="container mx-auto px-4 py-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Compare Quotes</h1>
+        <p class="text-gray-600 mt-2">
+          Compare quotes for:
+          <span class="font-medium">{{ requirement.title }}</span>
+        </p>
+      </div>
+      <a
+        href="{% url 'dashboard:requirement_detail' requirement.id %}"
+        class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+      >
+        <svg
+          class="w-5 h-5 mr-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10 19l-7-7m0 0l7-7m-7 7h18"
+          ></path>
+        </svg>
+        Back to Requirement
+      </a>
+    </div>
+  </div>
+
+  <!-- Requirement Summary -->
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div>
+        <p class="text-sm text-blue-600 font-medium">Destination</p>
+        <p class="text-lg font-semibold text-blue-900">
+          {{ requirement.destination }}
+        </p>
+      </div>
+      <div>
+        <p class="text-sm text-blue-600 font-medium">Travel Dates</p>
+        <p class="text-lg font-semibold text-blue-900">
+          {{ requirement.travel_date_start|date:"M d" }} - {{
+          requirement.travel_date_end|date:"M d, Y" }}
+        </p>
+      </div>
+      <div>
+        <p class="text-sm text-blue-600 font-medium">Travelers</p>
+        <p class="text-lg font-semibold text-blue-900">
+          {{ requirement.number_of_adults }} Adults {% if
+          requirement.number_of_children > 0 %} + {{
+          requirement.number_of_children }} Children {% endif %}
+        </p>
+      </div>
+      <div>
+        <p class="text-sm text-blue-600 font-medium">Budget</p>
+        <p class="text-lg font-semibold text-blue-900">
+          {% if requirement.budget_max %} ${{
+          requirement.budget_max|floatformat:0 }} {% else %} Not specified {%
+          endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quotes Comparison -->
+  {% if quotes %}
+  <div class="grid grid-cols-1 lg:grid-cols-{{ quotes|length }} gap-6">
+    {% for quote in quotes %}
+    <div
+      class="bg-white rounded-lg shadow-lg overflow-hidden {% if quote.status == 'accepted' %} border-2 border-green-500 {% elif quote.is_expired_check %} opacity-75 {% endif %}"
+    >
+      <!-- Quote Header -->
+      <div
+        class="p-6 {% if quote.status == 'accepted' %} bg-green-50 border-b border-green-200 {% elif quote.is_expired_check %} bg-gray-50 border-b border-gray-200 {% else %} bg-white border-b border-gray-200 {% endif %}"
+      >
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center">
+            {% if quote.agent.company_logo %}
+            <img
+              src="{{ quote.agent.company_logo.url }}"
+              alt="{{ quote.agent.company_name }}"
+              class="w-12 h-12 rounded-full object-cover mr-3"
+            />
+            {% else %}
+            <div
+              class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mr-3"
+            >
+              <svg
+                class="w-6 h-6 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                ></path>
+              </svg>
+            </div>
+            {% endif %}
+            <div>
+              <h3 class="text-lg font-semibold text-gray-900">
+                {{ quote.agent.company_name }}
+              </h3>
+              <div class="flex items-center text-sm text-gray-500">
+                <svg
+                  class="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                  ></path>
+                </svg>
+                {{ quote.agent.business_city }}, {{ quote.agent.business_country
+                }}
+              </div>
+            </div>
+          </div>
+          {% if quote.status == 'accepted' %}
+          <span
+            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+          >
+            <svg
+              class="w-4 h-4 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            Accepted
+          </span>
+          {% elif quote.is_expired_check %}
+          <span
+            class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800"
+          >
+            <svg
+              class="w-4 h-4 mr-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            Expired
+          </span>
+          {% endif %}
+        </div>
+
+        <!-- Price -->
+        <div class="text-center">
+          <p class="text-sm text-gray-500">Total Price</p>
+          <p class="text-3xl font-bold text-gray-900">
+            ${{ quote.total_amount|floatformat:2 }}
+          </p>
+          {% if quote.is_expired_check %}
+          <p class="text-xs text-red-600 mt-1">
+            Expired on {{ quote.valid_until|date:"M d, Y" }}
+          </p>
+          {% else %}
+          <p class="text-xs text-gray-500 mt-1">
+            Valid until {{ quote.valid_until|date:"M d, Y" }}
+          </p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Quote Details -->
+      <div class="p-6">
+        <!-- Agent Rating -->
+        <div
+          class="flex items-center justify-between mb-4 pb-4 border-b border-gray-200"
+        >
+          <div class="flex items-center">
+            <p class="text-sm text-gray-600 mr-2">Agent Rating:</p>
+            <div class="flex items-center">
+              {% if quote.agent.average_rating > 0 %}
+              <div class="flex text-yellow-400">
+                {% for i in "12345" %} {% if forloop.counter <=
+                quote.agent.average_rating %}
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"
+                  ></path>
+                </svg>
+                {% else %}
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.837-.197-1.539-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                  ></path>
+                </svg>
+                {% endif %} {% endfor %}
+              </div>
+              <span class="ml-1 text-sm text-gray-600">
+                ({{ quote.agent.average_rating|floatformat:1 }}) • {{
+                quote.agent.total_reviews }} reviews
+              </span>
+              {% else %}
+              <span class="text-sm text-gray-500">No reviews yet</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="text-sm text-gray-500">
+            {{ quote.agent.total_bookings }} bookings
+          </div>
+        </div>
+
+        <!-- Inclusions -->
+        {% if quote.inclusions %}
+        <div class="mb-4">
+          <h4 class="text-sm font-semibold text-gray-900 mb-2">
+            What's Included
+          </h4>
+          <div class="text-sm text-gray-600 whitespace-pre-line">
+            {{ quote.inclusions }}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Exclusions -->
+        {% if quote.exclusions %}
+        <div class="mb-4">
+          <h4 class="text-sm font-semibold text-gray-900 mb-2">
+            What's Not Included
+          </h4>
+          <div class="text-sm text-gray-600 whitespace-pre-line">
+            {{ quote.exclusions }}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Itinerary -->
+        {% if quote.itinerary %}
+        <div class="mb-4">
+          <h4 class="text-sm font-semibold text-gray-900 mb-2">Itinerary</h4>
+          <div class="text-sm text-gray-600 whitespace-pre-line">
+            {{ quote.itinerary }}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Notes -->
+        {% if quote.notes %}
+        <div class="mb-6">
+          <h4 class="text-sm font-semibold text-gray-900 mb-2">
+            Additional Notes
+          </h4>
+          <div class="text-sm text-gray-600">{{ quote.notes }}</div>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Actions -->
+      <div
+        class="px-6 py-4 bg-gray-50 border-t border-gray-200 {% if quote.status == 'accepted' %} bg-green-50 border-green-200 {% endif %}"
+      >
+        {% if quote.status == 'accepted' %}
+        <div class="text-center">
+          <p class="text-sm font-medium text-green-800 mb-3">
+            This quote has been accepted
+          </p>
+          <a
+            href="{% url 'bookings:create' quote.id %}"
+            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+          >
+            Proceed to Booking
+          </a>
+        </div>
+        {% elif quote.is_expired_check %}
+        <div class="text-center">
+          <p class="text-sm text-red-600">This quote has expired</p>
+        </div>
+        {% else %}
+        <div class="flex space-x-3">
+          <button
+            onclick="acceptQuote('{{ quote.id }}')"
+            class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+          >
+            <svg
+              class="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 13l4 4L19 7"
+              ></path>
+            </svg>
+            Accept Quote
+          </button>
+          <button
+            onclick="rejectQuote('{{ quote.id }}')"
+            class="flex-1 inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            <svg
+              class="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+            Reject Quote
+          </button>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="bg-white rounded-lg shadow p-8 text-center">
+    <svg
+      class="mx-auto h-12 w-12 text-gray-400"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+      ></path>
+    </svg>
+    <h3 class="mt-2 text-sm font-medium text-gray-900">No quotes to compare</h3>
+    <p class="mt-1 text-sm text-gray-500">
+      You haven't received any quotes for this requirement yet.
+    </p>
+    <div class="mt-6">
+      <a
+        href="{% url 'dashboard:requirement_detail' requirement.id %}"
+        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+      >
+        Back to Requirement
+      </a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- JavaScript for quote actions -->
+<script>
+  function acceptQuote(quoteId) {
+    if (
+      confirm(
+        "Are you sure you want to accept this quote? This will reject all other quotes for this requirement."
+      )
+    ) {
+      fetch(`/dashboard/quotes/${quoteId}/accept/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            location.reload();
+          } else {
+            alert(data.message || "Error accepting quote");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("Error accepting quote");
+        });
+    }
+  }
+
+  function rejectQuote(quoteId) {
+    if (confirm("Are you sure you want to reject this quote?")) {
+      fetch(`/dashboard/quotes/${quoteId}/reject/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.success) {
+            location.reload();
+          } else {
+            alert(data.message || "Error rejecting quote");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("Error rejecting quote");
+        });
+    }
+  }
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+{% block title %}Complete Payment - Travel Marketplace{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+  <!-- Header -->
+  <div class="mb-8 flex justify-between items-center">
+    <div>
+      <h1 class="text-3xl font-bold text-gray-900">Complete Payment</h1>
+      <p class="text-gray-600 mt-2">
+        Securely complete your booking payment
+      </p>
+    </div>
+    <div class="flex space-x-3">
+      <a
+        href="{% url 'bookings:detail' booking.id %}"
+        class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+      >
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M10 19l-7-7m0 0l7-7m-7 7h18"
+          ></path>
+        </svg>
+        Back to Booking Details
+      </a>
+    </div>
+  </div>
+
+  <div class="max-w-4xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Booking Summary -->
+      <div class="lg:col-span-2">
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Booking Summary</h2>
+          </div>
+          
+          <div class="px-6 py-4">
+            <div class="space-y-4">
+              <div class="flex justify-between">
+                <span class="text-gray-600">Booking #</span>
+                <span class="font-medium">{{ booking.id }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Service Type</span>
+                <span class="font-medium">{{ booking.quote.requirement.service_type|title }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Destination</span>
+                <span class="font-medium">{{ booking.quote.requirement.destination }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Travel Dates</span>
+                <span class="font-medium">{{ booking.quote.requirement.departure_date }} - {{ booking.quote.requirement.return_date }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-gray-600">Number of Travelers</span>
+                <span class="font-medium">{{ booking.quote.requirement.travelers }}</span>
+              </div>
+            </div>
+            
+            <div class="mt-6 pt-4 border-t border-gray-200">
+              <h3 class="text-md font-medium text-gray-900 mb-3">Agent Information</h3>
+              <div class="flex items-center space-x-3">
+                <img
+                  src="https://picsum.photos/seed/agent{{ booking.quote.agent.id }}/50/50.jpg"
+                  alt="{{ booking.quote.agent.user.get_full_name }}"
+                  class="w-12 h-12 rounded-full object-cover"
+                />
+                <div>
+                  <p class="font-medium text-gray-900">{{ booking.quote.agent.user.get_full_name }}</p>
+                  <p class="text-sm text-gray-600">{{ booking.quote.agent.agency_name }}</p>
+                  <div class="flex items-center mt-1">
+                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <span class="text-sm text-gray-600 ml-1">{{ booking.quote.agent.rating|default:"4.5" }}/5</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Payment Method -->
+        <div class="bg-white rounded-lg shadow mt-6">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Payment Method</h2>
+          </div>
+          
+          <div class="px-6 py-4">
+            <form method="post" id="payment-form">
+              {% csrf_token %}
+              <div class="space-y-4">
+                <div class="flex items-center p-4 border border-blue-500 rounded-lg bg-blue-50">
+                  <input type="radio" name="payment_method" id="paypal" checked class="mr-3">
+                  <label for="paypal" class="flex items-center cursor-pointer">
+                  <svg class="w-8 h-8 mr-2" viewBox="0 0 24 24" fill="none">
+                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 2.419c.102-.464.462-.819.933-.819h7.684c2.638 0 4.724 1.527 4.724 4.258 0 2.846-2.086 4.258-4.724 4.258h-3.48l-.7 3.324a.641.641 0 0 1-.633.497z" fill="#003087"/>
+                    <path d="M20.615 9.958h-4.531a.641.641 0 0 0-.633.74l1.107 5.178c.102.464.462.819.933.819h2.124a.641.641 0 0 0 .633-.74l-.7-3.324h1.067c2.638 0 4.724-1.527 4.724-4.258 0-.417-.048-.819-.14-1.215z" fill="#009CDE"/>
+                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 2.419c.102-.464.462-.819.933-.819h7.684c2.638 0 4.724 1.527 4.724 4.258 0 2.846-2.086 4.258-4.724 4.258h-3.48l-.7 3.324a.641.641 0 0 1-.633.497z" fill="#003087"/>
+                  </svg>
+                  <span class="font-medium">PayPal</span>
+                </label>
+              </div>
+              
+              <div class="flex items-center p-4 border border-gray-300 rounded-lg">
+                <input type="radio" name="payment_method" id="card" class="mr-3">
+                <label for="card" class="flex items-center cursor-pointer">
+                  <svg class="w-8 h-8 mr-2" viewBox="0 0 24 24" fill="none">
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                    <line x1="1" y1="10" x2="23" y2="10" stroke="currentColor" stroke-width="2"/>
+                  </svg>
+                  <span class="font-medium">Credit/Debit Card</span>
+                </label>
+              </div>
+            </div>
+          </form>
+            
+            <div class="mt-6">
+              <button id="pay-button" class="w-full bg-blue-600 text-white py-3 px-4 rounded-md hover:bg-blue-700 font-medium">
+                Pay Now with PayPal
+              </button>
+              <p class="text-xs text-gray-500 mt-2 text-center">
+                By clicking this button, you agree to our Terms of Service and Privacy Policy.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Price Breakdown -->
+      <div class="lg:col-span-1">
+        <div class="bg-white rounded-lg shadow">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Price Breakdown</h2>
+          </div>
+          
+          <div class="px-6 py-4 space-y-3">
+            <div class="flex justify-between">
+              <span class="text-gray-600">Quote Amount</span>
+              <span class="font-medium">₹{{ booking.quote.total_amount }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">Platform Fee (1%)</span>
+              <span class="font-medium">₹{{ booking.customer_commission }}</span>
+            </div>
+            <div class="flex justify-between text-sm text-gray-500">
+              <span>Agent Commission (2%)</span>
+              <span>₹{{ booking.agent_commission }}</span>
+            </div>
+            
+            <div class="pt-3 mt-3 border-t border-gray-200">
+              <div class="flex justify-between">
+                <span class="text-lg font-semibold text-gray-900">Total Amount</span>
+                <span class="text-lg font-semibold text-blue-600">₹{{ booking.total_amount }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Cancellation Policy -->
+        <div class="bg-white rounded-lg shadow mt-6">
+          <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Cancellation Policy</h2>
+          </div>
+          
+          <div class="px-6 py-4">
+            <div class="space-y-2 text-sm text-gray-600">
+              <p>• Free cancellation up to 24 hours before travel date</p>
+              <p>• 50% refund for cancellations 12-24 hours before travel</p>
+              <p>• No refund for cancellations less than 12 hours before travel</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PayPal SDK -->
+<script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
+  const payButton = document.getElementById('pay-button');
+  const paypalContainer = document.createElement('div');
+  paypalContainer.id = 'paypal-button-container';
+  paypalContainer.className = 'mt-4';
+  
+  paymentMethods.forEach(method => {
+    method.addEventListener('change', function() {
+      const selectedMethod = this.id;
+      
+      // Clear previous PayPal button if it exists
+      const existingButton = document.getElementById('paypal-button-container');
+      if (existingButton) {
+        existingButton.remove();
+      }
+      
+      if (selectedMethod === 'paypal') {
+        payButton.textContent = 'Pay Now with PayPal';
+        payButton.style.display = 'none';
+        
+        // Add PayPal button container
+        payButton.parentNode.insertBefore(paypalContainer, payButton.nextSibling);
+        
+        // Render PayPal button
+        paypal.Buttons({
+          createOrder: function(data, actions) {
+            // Set up the transaction
+            return actions.order.create({
+              purchase_units: [{
+                amount: {
+                  value: '{{ booking.total_amount }}'
+                }
+              }]
+            });
+          },
+          onApprove: function(data, actions) {
+            // Capture the funds from the transaction
+            return actions.order.capture().then(function(details) {
+              // Show a success message to the buyer
+              alert('Transaction completed by ' + details.payer.name.given_name);
+              
+              // Submit the form to process payment
+              const form = document.createElement('form');
+              form.method = 'POST';
+              form.action = "{% url 'bookings:payment' booking.id %}";
+              
+              const paymentMethodInput = document.createElement('input');
+              paymentMethodInput.type = 'hidden';
+              paymentMethodInput.name = 'payment_method';
+              paymentMethodInput.value = 'paypal';
+              
+              const paypalOrderIdInput = document.createElement('input');
+              paypalOrderIdInput.type = 'hidden';
+              paypalOrderIdInput.name = 'paypal_order_id';
+              paypalOrderIdInput.value = data.orderID;
+              
+              form.appendChild(paymentMethodInput);
+              form.appendChild(paypalOrderIdInput);
+              
+              document.body.appendChild(form);
+              form.submit();
+            });
+          },
+          onError: function (err) {
+            // Show an error message to the buyer
+            alert('Payment failed. Please try again or use a different payment method.');
+            console.error('PayPal error:', err);
+          }
+        }).render('#paypal-button-container');
+        
+      } else if (selectedMethod === 'card') {
+        payButton.textContent = 'Pay Now with Card';
+        payButton.style.display = 'block';
+        
+        // Remove PayPal button if it exists
+        const existingButton = document.getElementById('paypal-button-container');
+        if (existingButton) {
+          existingButton.remove();
+        }
+      }
+    });
+  });
+  
+  // Initialize with PayPal selected
+  document.getElementById('paypal').checked = true;
+  document.getElementById('paypal').dispatchEvent(new Event('change'));
+  
+  payButton.addEventListener('click', function() {
+    // Show loading state
+    this.disabled = true;
+    this.innerHTML = '<span class="spinner-border spinner-border-sm mr-2" role="status" aria-hidden="true"></span>Processing...';
+    
+    // Get the existing form
+    const form = document.getElementById('payment-form');
+    
+    // Add payment method input if not exists
+    if (!form.querySelector('input[name="payment_method"]')) {
+      const paymentMethodInput = document.createElement('input');
+      paymentMethodInput.type = 'hidden';
+      paymentMethodInput.name = 'payment_method';
+      paymentMethodInput.value = 'card';
+      form.appendChild(paymentMethodInput);
+    }
+    
+    // Submit the form
+    form.submit();
+  });
+});
+
+// Helper function to get CSRF token
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+</script>
+
+<style>
+.spinner-border {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  vertical-align: text-bottom;
+  border: 0.25em solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spinner-border .75s linear infinite;
+}
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.125em;
+}
+
+@keyframes spinner-border {
+  to { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}

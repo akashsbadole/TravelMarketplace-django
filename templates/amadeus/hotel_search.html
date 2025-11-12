@@ -1,0 +1,567 @@
+{% extends 'base.html' %}
+{% block title %}Search Hotels - Travel Marketplace{% endblock %}
+
+{% block extra_css %}
+<style>
+.hotel-search-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.search-form-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+}
+
+.date-input-group {
+    position: relative;
+}
+
+.date-input-group .form-control {
+    padding-left: 40px;
+}
+
+.date-input-group .date-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    z-index: 10;
+}
+
+.guest-selector {
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    background: white;
+    padding: 15px;
+}
+
+.guest-selector .btn-counter {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: #f3f4f6;
+    color: #374151;
+    font-weight: bold;
+}
+
+.guest-selector .btn-counter:hover {
+    background: #e5e7eb;
+}
+
+.amenity-checkboxes {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.advanced-options {
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.city-autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.city-autocomplete-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.city-autocomplete-item:hover {
+    background: #f3f4f6;
+}
+
+.city-autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.city-code {
+    font-weight: bold;
+    color: #4f46e5;
+}
+
+.city-name {
+    color: #6b7280;
+    font-size: 0.9em;
+}
+
+.loading-spinner {
+    display: none;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.popular-destination {
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+}
+
+.popular-destination:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+}
+
+.destination-overlay {
+    background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    color: white;
+}
+
+.destination-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.destination-info {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Hero Section -->
+    <div class="hotel-search-card text-white py-16">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                    Find Your Perfect Hotel
+                </h1>
+                <p class="text-xl opacity-90">
+                    Search thousands of hotels worldwide at the best prices
+                </p>
+            </div>
+            
+            <!-- Search Form -->
+            <div class="search-form-container p-8 max-w-6xl mx-auto">
+                <form method="post" id="hotelSearchForm">
+                    {% csrf_token %}
+                    
+                    <!-- Destination -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <label for="city_code" class="form-label font-semibold">Destination</label>
+                            <div class="position-relative">
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="cityInput" 
+                                       placeholder="Enter city name"
+                                       autocomplete="off">
+                                {{ form.city_code.as_hidden }}
+                                <div class="loading-spinner">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                                <div id="cityAutocomplete" class="city-autocomplete-dropdown"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dates -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label for="{{ form.check_in_date.id_for_label }}" class="form-label font-semibold">
+                                Check-in Date
+                            </label>
+                            <div class="date-input-group">
+                                <i class="fas fa-calendar date-icon"></i>
+                                {{ form.check_in_date|add_class:"form-control form-control-lg" }}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.check_out_date.id_for_label }}" class="form-label font-semibold">
+                                Check-out Date
+                            </label>
+                            <div class="date-input-group">
+                                <i class="fas fa-calendar date-icon"></i>
+                                {{ form.check_out_date|add_class:"form-control form-control-lg" }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Guests and Rooms -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label class="form-label font-semibold">Guests & Rooms</label>
+                            <div class="guest-selector">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <div class="fw-bold">Adults</div>
+                                        <div class="text-muted small">Age 18+</div>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn-counter" onclick="updateGuests('adults', -1)">-</button>
+                                        <span class="mx-3 fw-bold" id="adultsCount">{{ form.adults.value }}</span>
+                                        <button type="button" class="btn-counter" onclick="updateGuests('adults', 1)">+</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div>
+                                        <div class="fw-bold">Children</div>
+                                        <div class="text-muted small">Age 2-17</div>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn-counter" onclick="updateGuests('children', -1)">-</button>
+                                        <span class="mx-3 fw-bold" id="childrenCount">{{ form.children.value }}</span>
+                                        <button type="button" class="btn-counter" onclick="updateGuests('children', 1)">+</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="fw-bold">Rooms</div>
+                                        <div class="text-muted small">Number of rooms</div>
+                                    </div>
+                                    <div>
+                                        <button type="button" class="btn-counter" onclick="updateGuests('room_quantity', -1)">-</button>
+                                        <span class="mx-3 fw-bold" id="roomsCount">{{ form.room_quantity.value }}</span>
+                                        <button type="button" class="btn-counter" onclick="updateGuests('room_quantity', 1)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {{ form.adults.as_hidden }}
+                            {{ form.children.as_hidden }}
+                            {{ form.room_quantity.as_hidden }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.rating.id_for_label }}" class="form-label font-semibold">
+                                Minimum Rating
+                            </label>
+                            <div class="d-flex align-items-center">
+                                {{ form.rating|add_class:"form-control form-control-lg me-3" }}
+                                <div id="ratingStars" class="text-warning">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Options Toggle -->
+                    <div class="text-center mb-4">
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#advancedOptions">
+                            <i class="fas fa-cog me-2"></i>Advanced Options
+                        </button>
+                    </div>
+                    
+                    <!-- Advanced Options -->
+                    <div class="collapse" id="advancedOptions">
+                        <div class="advanced-options">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.price_range.id_for_label }}" class="form-label">
+                                        Price Range (USD per night)
+                                    </label>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <input type="number" class="form-control" id="minPrice" placeholder="Min">
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="number" class="form-control" id="maxPrice" placeholder="Max">
+                                        </div>
+                                    </div>
+                                    {{ form.price_range.as_hidden }}
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Amenities</label>
+                                    <div class="amenity-checkboxes">
+                                        {% for choice in form.amenities %}
+                                        <div class="form-check">
+                                            {{ choice.tag }}
+                                            <label class="form-check-label" for="{{ choice.id_for_label }}">
+                                                {{ choice.choice_label }}
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="text-center mt-6">
+                        <button type="submit" class="btn btn-primary btn-lg px-8 py-3">
+                            <i class="fas fa-search me-2"></i>
+                            Search Hotels
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Popular Destinations -->
+    <div class="container mx-auto px-4 py-12">
+        <h2 class="text-3xl font-bold text-center mb-8">Popular Hotel Destinations</h2>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="popular-destination position-relative" onclick="selectDestination('PAR', 'Paris')">
+                    <img src="https://picsum.photos/seed/paris-hotels/400/300.jpg" class="card-img-top" alt="Paris Hotels">
+                    <div class="destination-overlay">
+                        <div class="destination-name">Paris</div>
+                        <div class="destination-info">2,847 hotels from $45/night</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="popular-destination position-relative" onclick="selectDestination('NYC', 'New York')">
+                    <img src="https://picsum.photos/seed/newyork-hotels/400/300.jpg" class="card-img-top" alt="New York Hotels">
+                    <div class="destination-overlay">
+                        <div class="destination-name">New York</div>
+                        <div class="destination-info">1,234 hotels from $65/night</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="popular-destination position-relative" onclick="selectDestination('LON', 'London')">
+                    <img src="https://picsum.photos/seed/london-hotels/400/300.jpg" class="card-img-top" alt="London Hotels">
+                    <div class="destination-overlay">
+                        <div class="destination-name">London</div>
+                        <div class="destination-info">3,156 hotels from $55/night</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="popular-destination position-relative" onclick="selectDestination('TYO', 'Tokyo')">
+                    <img src="https://picsum.photos/seed/tokyo-hotels/400/300.jpg" class="card-img-top" alt="Tokyo Hotels">
+                    <div class="destination-overlay">
+                        <div class="destination-name">Tokyo</div>
+                        <div class="destination-info">1,892 hotels from $40/night</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hotel Features -->
+    <div class="bg-light py-12">
+        <div class="container mx-auto px-4">
+            <div class="row">
+                <div class="col-md-3 text-center mb-4">
+                    <i class="fas fa-bed text-primary" style="font-size: 3rem;"></i>
+                    <h4 class="mt-3">Wide Selection</h4>
+                    <p class="text-muted">Over 1 million hotels worldwide</p>
+                </div>
+                <div class="col-md-3 text-center mb-4">
+                    <i class="fas fa-dollar-sign text-primary" style="font-size: 3rem;"></i>
+                    <h4 class="mt-3">Best Price Guarantee</h4>
+                    <p class="text-muted">Find lower price, we'll match it</p>
+                </div>
+                <div class="col-md-3 text-center mb-4">
+                    <i class="fas fa-shield-alt text-primary" style="font-size: 3rem;"></i>
+                    <h4 class="mt-3">Secure Booking</h4>
+                    <p class="text-muted">Your payment is protected</p>
+                </div>
+                <div class="col-md-3 text-center mb-4">
+                    <i class="fas fa-headset text-primary" style="font-size: 3rem;"></i>
+                    <h4 class="mt-3">24/7 Support</h4>
+                    <p class="text-muted">We're here to help anytime</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedCity = null;
+let autocompleteTimeout;
+
+// Guest counters
+function updateGuests(type, change) {
+    const countElement = document.getElementById(type + 'Count');
+    const hiddenElement = document.getElementById('id_' + type);
+    let count = parseInt(countElement.textContent);
+    
+    count += change;
+    
+    // Validate limits
+    if (type === 'adults') {
+        count = Math.max(1, Math.min(9, count));
+    } else if (type === 'children') {
+        count = Math.max(0, Math.min(8, count));
+    } else if (type === 'room_quantity') {
+        count = Math.max(1, Math.min(9, count));
+    }
+    
+    countElement.textContent = count;
+    hiddenElement.value = count;
+}
+
+// City autocomplete
+document.getElementById('cityInput').addEventListener('input', function() {
+    const query = this.value.trim();
+    
+    if (query.length < 2) {
+        document.getElementById('cityAutocomplete').style.display = 'none';
+        return;
+    }
+    
+    // Clear previous timeout
+    clearTimeout(autocompleteTimeout);
+    
+    // Show loading spinner
+    document.querySelector('.loading-spinner').style.display = 'block';
+    
+    // Set new timeout
+    autocompleteTimeout = setTimeout(() => {
+        fetch('/amadeus/api/airport-autocomplete/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: 'query=' + encodeURIComponent(query)
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector('.loading-spinner').style.display = 'none';
+            
+            if (data.suggestions && data.suggestions.length > 0) {
+                // Filter for cities only
+                const cities = data.suggestions.filter(item => item.sub_type === 'CITY');
+                
+                if (cities.length > 0) {
+                    document.getElementById('cityAutocomplete').innerHTML = cities.map(item => `
+                        <div class="city-autocomplete-item" onclick="selectCity('${item.iata_code}', '${item.city}', '${item.country}')">
+                            <span class="city-code">${item.iata_code}</span> - 
+                            <span class="city-name">${item.city}, ${item.country}</span>
+                        </div>
+                    `).join('');
+                    document.getElementById('cityAutocomplete').style.display = 'block';
+                } else {
+                    document.getElementById('cityAutocomplete').style.display = 'none';
+                }
+            } else {
+                document.getElementById('cityAutocomplete').style.display = 'none';
+            }
+        })
+        .catch(error => {
+            document.querySelector('.loading-spinner').style.display = 'none';
+            console.error('Autocomplete error:', error);
+        });
+    }, 300);
+});
+
+function selectCity(iataCode, cityName, country) {
+    document.getElementById('cityInput').value = `${cityName}, ${country}`;
+    document.getElementById('id_city_code').value = iataCode;
+    document.getElementById('cityAutocomplete').style.display = 'none';
+    selectedCity = { iataCode, cityName, country };
+}
+
+function selectDestination(iataCode, cityName) {
+    document.getElementById('cityInput').value = cityName;
+    document.getElementById('id_city_code').value = iataCode;
+    selectedCity = { iataCode, cityName };
+    
+    // Scroll to search form
+    document.querySelector('.hotel-search-card').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Rating display
+document.getElementById('id_rating').addEventListener('input', function() {
+    const rating = parseFloat(this.value) || 0;
+    const stars = document.querySelectorAll('#ratingStars i');
+    
+    stars.forEach((star, index) => {
+        if (index < Math.floor(rating)) {
+            star.classList.remove('far');
+            star.classList.add('fas');
+        } else {
+            star.classList.remove('fas');
+            star.classList.add('far');
+        }
+    });
+});
+
+// Price range handling
+document.getElementById('minPrice').addEventListener('input', updatePriceRange);
+document.getElementById('maxPrice').addEventListener('input', updatePriceRange);
+
+function updatePriceRange() {
+    const minPrice = document.getElementById('minPrice').value;
+    const maxPrice = document.getElementById('maxPrice').value;
+    
+    if (minPrice || maxPrice) {
+        const range = minPrice ? `${minPrice}-${maxPrice || ''}` : `-${maxPrice}`;
+        document.getElementById('id_price_range').value = range;
+    } else {
+        document.getElementById('id_price_range').value = '';
+    }
+}
+
+// Hide autocomplete when clicking outside
+document.addEventListener('click', function(e) {
+    const cityInput = document.getElementById('cityInput');
+    const autocomplete = document.getElementById('cityAutocomplete');
+    
+    if (!cityInput.contains(e.target) && !autocomplete.contains(e.target)) {
+        autocomplete.style.display = 'none';
+    }
+});
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Initialize rating display
+document.addEventListener('DOMContentLoaded', function() {
+    const ratingInput = document.getElementById('id_rating');
+    if (ratingInput.value) {
+        ratingInput.dispatchEvent(new Event('input'));
+    }
+});
+</script>
+{% endblock %}

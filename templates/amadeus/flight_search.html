@@ -1,0 +1,556 @@
+{% extends 'base.html' %}
+{% block title %}Search Flights - Travel Marketplace{% endblock %}
+
+{% block extra_css %}
+<style>
+.flight-search-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+}
+
+.search-form-container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+}
+
+.trip-type-toggle {
+    background: #f3f4f6;
+    border-radius: 10px;
+    padding: 4px;
+}
+
+.trip-type-toggle .form-check-input:checked + label {
+    background: #4f46e5;
+    color: white;
+    border-radius: 8px;
+}
+
+.passenger-counter {
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    background: white;
+}
+
+.passenger-counter .btn-counter {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: #f3f4f6;
+    color: #374151;
+    font-weight: bold;
+}
+
+.passenger-counter .btn-counter:hover {
+    background: #e5e7eb;
+}
+
+.airline-preferences {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.advanced-options {
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.autocomplete-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    z-index: 1000;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.autocomplete-item {
+    padding: 12px 16px;
+    border-bottom: 1px solid #f3f4f6;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.autocomplete-item:hover {
+    background: #f3f4f6;
+}
+
+.autocomplete-item:last-child {
+    border-bottom: none;
+}
+
+.airport-code {
+    font-weight: bold;
+    color: #4f46e5;
+}
+
+.airport-name {
+    color: #6b7280;
+    font-size: 0.9em;
+}
+
+.loading-spinner {
+    display: none;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Hero Section -->
+    <div class="flight-search-card text-white py-16">
+        <div class="container mx-auto px-4">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                    Find Your Perfect Flight
+                </h1>
+                <p class="text-xl opacity-90">
+                    Search millions of flights from airlines worldwide
+                </p>
+            </div>
+            
+            <!-- Search Form -->
+            <div class="search-form-container p-8 max-w-6xl mx-auto">
+                <form method="post" id="flightSearchForm">
+                    {% csrf_token %}
+                    
+                    <!-- Trip Type -->
+                    <div class="mb-6">
+                        <div class="trip-type-toggle d-flex">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="trip_type" id="roundTrip" value="round_trip" checked>
+                                <label class="form-check-label px-4 py-2 cursor-pointer" for="roundTrip">
+                                    Round Trip
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="trip_type" id="oneWay" value="one_way">
+                                <label class="form-check-label px-4 py-2 cursor-pointer" for="oneWay">
+                                    One Way
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Origin and Destination -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label for="origin" class="form-label font-semibold">From</label>
+                            <div class="position-relative">
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="originInput" 
+                                       placeholder="Enter city or airport"
+                                       autocomplete="off">
+                                {{ form.origin.as_hidden }}
+                                <div class="loading-spinner">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                                <div id="originAutocomplete" class="autocomplete-dropdown"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="destination" class="form-label font-semibold">To</label>
+                            <div class="position-relative">
+                                <input type="text" 
+                                       class="form-control form-control-lg" 
+                                       id="destinationInput" 
+                                       placeholder="Enter city or airport"
+                                       autocomplete="off">
+                                {{ form.destination.as_hidden }}
+                                <div class="loading-spinner">
+                                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                                <div id="destinationAutocomplete" class="autocomplete-dropdown"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Swap Button -->
+                    <div class="text-center mb-4">
+                        <button type="button" id="swapLocations" class="btn btn-light rounded-circle">
+                            <i class="fas fa-exchange-alt"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Dates -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label for="{{ form.departure_date.id_for_label }}" class="form-label font-semibold">
+                                Departure Date
+                            </label>
+                            {{ form.departure_date|add_class:"form-control form-control-lg" }}
+                        </div>
+                        
+                        <div class="col-md-6" id="returnDateField">
+                            <label for="{{ form.return_date.id_for_label }}" class="form-label font-semibold">
+                                Return Date
+                            </label>
+                            {{ form.return_date|add_class:"form-control form-control-lg" }}
+                        </div>
+                    </div>
+                    
+                    <!-- Passengers and Cabin Class -->
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label class="form-label font-semibold">Passengers</label>
+                            <div class="passenger-counter p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Adults</span>
+                                    <div>
+                                        <button type="button" class="btn-counter" onclick="updatePassengers('adults', -1)">-</button>
+                                        <span class="mx-3 font-bold" id="adultsCount">{{ form.adults.value }}</span>
+                                        <button type="button" class="btn-counter" onclick="updatePassengers('adults', 1)">+</button>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Children (2-11)</span>
+                                    <div>
+                                        <button type="button" class="btn-counter" onclick="updatePassengers('children', -1)">-</button>
+                                        <span class="mx-3 font-bold" id="childrenCount">{{ form.children.value }}</span>
+                                        <button type="button" class="btn-counter" onclick="updatePassengers('children', 1)">+</button>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Infants (Under 2)</span>
+                                    <div>
+                                        <button type="button" class="btn-counter" onclick="updatePassengers('infants', -1)">-</button>
+                                        <span class="mx-3 font-bold" id="infantsCount">{{ form.infants.value }}</span>
+                                        <button type="button" class="btn-counter" onclick="updatePassengers('infants', 1)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                            {{ form.adults.as_hidden }}
+                            {{ form.children.as_hidden }}
+                            {{ form.infants.as_hidden }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="{{ form.cabin_class.id_for_label }}" class="form-label font-semibold">
+                                Cabin Class
+                            </label>
+                            {{ form.cabin_class|add_class:"form-select form-select-lg" }}
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Options Toggle -->
+                    <div class="text-center mb-4">
+                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="collapse" data-bs-target="#advancedOptions">
+                            <i class="fas fa-cog me-2"></i>Advanced Options
+                        </button>
+                    </div>
+                    
+                    <!-- Advanced Options -->
+                    <div class="collapse" id="advancedOptions">
+                        <div class="advanced-options">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-check">
+                                        {{ form.direct_flights_only|add_class:"form-check-input" }}
+                                        <label class="form-check-label" for="{{ form.direct_flights_only.id_for_label }}">
+                                            Direct flights only
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="{{ form.max_price.id_for_label }}" class="form-label">
+                                        Maximum Price (USD)
+                                    </label>
+                                    {{ form.max_price|add_class:"form-control" }}
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-12">
+                                    <label class="form-label">Preferred Airlines</label>
+                                    <div class="airline-preferences">
+                                        {% for airline in form.preferred_airlines.queryset %}
+                                        <div class="form-check">
+                                            {{ form.preferred_airlines|add_class:"form-check-input"|get_checkbox_input:airline.id }}
+                                            <label class="form-check-label" for="id_preferred_airlines_{{ forloop.counter0 }}">
+                                                {{ airline.name }} ({{ airline.iata_code }})
+                                            </label>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <div class="text-center mt-6">
+                        <button type="submit" class="btn btn-primary btn-lg px-8 py-3">
+                            <i class="fas fa-search me-2"></i>
+                            Search Flights
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Popular Destinations -->
+    <div class="container mx-auto px-4 py-12">
+        <h2 class="text-3xl font-bold text-center mb-8">Popular Destinations</h2>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card h-100 shadow-sm hover:shadow-lg transition-shadow">
+                    <img src="https://picsum.photos/seed/paris/400/250.jpg" class="card-img-top" alt="Paris">
+                    <div class="card-body">
+                        <h5 class="card-title">Paris</h5>
+                        <p class="card-text">City of Light</p>
+                        <button class="btn btn-outline-primary" onclick="selectDestination('PAR', 'Paris')">Select</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 shadow-sm hover:shadow-lg transition-shadow">
+                    <img src="https://picsum.photos/seed/tokyo/400/250.jpg" class="card-img-top" alt="Tokyo">
+                    <div class="card-body">
+                        <h5 class="card-title">Tokyo</h5>
+                        <p class="card-text">Modern Metropolis</p>
+                        <button class="btn btn-outline-primary" onclick="selectDestination('TYO', 'Tokyo')">Select</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 shadow-sm hover:shadow-lg transition-shadow">
+                    <img src="https://picsum.photos/seed/newyork/400/250.jpg" class="card-img-top" alt="New York">
+                    <div class="card-body">
+                        <h5 class="card-title">New York</h5>
+                        <p class="card-text">The Big Apple</p>
+                        <button class="btn btn-outline-primary" onclick="selectDestination('NYC', 'New York')">Select</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card h-100 shadow-sm hover:shadow-lg transition-shadow">
+                    <img src="https://picsum.photos/seed/london/400/250.jpg" class="card-img-top" alt="London">
+                    <div class="card-body">
+                        <h5 class="card-title">London</h5>
+                        <p class="card-text">Historic Capital</p>
+                        <button class="btn btn-outline-primary" onclick="selectDestination('LON', 'London')">Select</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Flight Inspiration -->
+    <div class="bg-light py-12">
+        <div class="container mx-auto px-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="text-3xl font-bold mb-4">Not sure where to go?</h2>
+                    <p class="text-lg mb-4">
+                        Get inspired with our budget-friendly flight suggestions to amazing destinations around the world.
+                    </p>
+                    <a href="{% url 'amadeus:flight_inspiration' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Get Flight Inspiration
+                    </a>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="fas fa-globe-americas text-primary" style="font-size: 8rem; opacity: 0.3;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let selectedOrigin = null;
+let selectedDestination = null;
+let autocompleteTimeout;
+
+// Trip type toggle
+document.getElementById('roundTrip').addEventListener('change', function() {
+    document.getElementById('returnDateField').style.display = 'block';
+});
+
+document.getElementById('oneWay').addEventListener('change', function() {
+    document.getElementById('returnDateField').style.display = 'none';
+    document.getElementById('id_return_date').value = '';
+});
+
+// Swap locations
+document.getElementById('swapLocations').addEventListener('click', function() {
+    const originInput = document.getElementById('originInput');
+    const destinationInput = document.getElementById('destinationInput');
+    const originHidden = document.getElementById('id_origin');
+    const destinationHidden = document.getElementById('id_destination');
+    
+    // Swap values
+    const tempValue = originInput.value;
+    const tempHidden = originHidden.value;
+    originInput.value = destinationInput.value;
+    originHidden.value = destinationHidden.value;
+    destinationInput.value = tempValue;
+    destinationHidden.value = tempHidden;
+    
+    // Swap selected objects
+    const temp = selectedOrigin;
+    selectedOrigin = selectedDestination;
+    selectedDestination = temp;
+});
+
+// Passenger counters
+function updatePassengers(type, change) {
+    const countElement = document.getElementById(type + 'Count');
+    const hiddenElement = document.getElementById('id_' + type);
+    let count = parseInt(countElement.textContent);
+    
+    count += change;
+    
+    // Validate limits
+    if (type === 'adults') {
+        count = Math.max(1, Math.min(9, count));
+    } else {
+        count = Math.max(0, Math.min(8, count));
+    }
+    
+    // Validate infants <= adults
+    if (type === 'infants') {
+        const adults = parseInt(document.getElementById('adultsCount').textContent);
+        if (count > adults) {
+            count = adults;
+        }
+    }
+    
+    countElement.textContent = count;
+    hiddenElement.value = count;
+}
+
+// Airport autocomplete
+function setupAutocomplete(inputId, hiddenId, autocompleteId) {
+    const input = document.getElementById(inputId);
+    const hidden = document.getElementById(hiddenId);
+    const autocomplete = document.getElementById(autocompleteId);
+    const spinner = input.parentElement.querySelector('.loading-spinner');
+    
+    input.addEventListener('input', function() {
+        const query = this.value.trim();
+        
+        if (query.length < 2) {
+            autocomplete.style.display = 'none';
+            return;
+        }
+        
+        // Clear previous timeout
+        clearTimeout(autocompleteTimeout);
+        
+        // Show loading spinner
+        spinner.style.display = 'block';
+        
+        // Set new timeout
+        autocompleteTimeout = setTimeout(() => {
+            fetch('/amadeus/api/airport-autocomplete/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: 'query=' + encodeURIComponent(query)
+            })
+            .then(response => response.json())
+            .then(data => {
+                spinner.style.display = 'none';
+                
+                if (data.suggestions && data.suggestions.length > 0) {
+                    autocomplete.innerHTML = data.suggestions.map(item => `
+                        <div class="autocomplete-item" onclick="selectAirport('${item.iata_code}', '${item.name}', '${inputId}', '${hiddenId}', '${autocompleteId}')">
+                            <span class="airport-code">${item.iata_code}</span> - 
+                            <span class="airport-name">${item.name}, ${item.city}, ${item.country}</span>
+                        </div>
+                    `).join('');
+                    autocomplete.style.display = 'block';
+                } else {
+                    autocomplete.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                spinner.style.display = 'none';
+                console.error('Autocomplete error:', error);
+            });
+        }, 300);
+    });
+    
+    // Hide autocomplete when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!input.contains(e.target) && !autocomplete.contains(e.target)) {
+            autocomplete.style.display = 'none';
+        }
+    });
+}
+
+function selectAirport(iataCode, name, inputId, hiddenId, autocompleteId) {
+    const input = document.getElementById(inputId);
+    const hidden = document.getElementById(hiddenId);
+    const autocomplete = document.getElementById(autocompleteId);
+    
+    input.value = name;
+    hidden.value = iataCode;
+    autocomplete.style.display = 'none';
+    
+    // Store selected airport
+    if (inputId === 'originInput') {
+        selectedOrigin = { iataCode, name };
+    } else {
+        selectedDestination = { iataCode, name };
+    }
+}
+
+function selectDestination(iataCode, name) {
+    document.getElementById('destinationInput').value = name;
+    document.getElementById('id_destination').value = iataCode;
+    selectedDestination = { iataCode, name };
+    
+    // Scroll to search form
+    document.querySelector('.flight-search-card').scrollIntoView({ behavior: 'smooth' });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Initialize autocomplete
+document.addEventListener('DOMContentLoaded', function() {
+    setupAutocomplete('originInput', 'id_origin', 'originAutocomplete');
+    setupAutocomplete('destinationInput', 'id_destination', 'destinationAutocomplete');
+});
+</script>
+{% endblock %}

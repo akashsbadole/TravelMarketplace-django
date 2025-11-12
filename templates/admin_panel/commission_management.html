@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+{% block title %}Commission Management - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Admin Header -->
+    <div class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-2xl font-bold text-gray-900">Commission Management</h1>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Admin
+                    </span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'admin_panel:dashboard' %}" 
+                       class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-arrow-left text-lg"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Commission Settings -->
+        <div class="bg-white rounded-lg shadow mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Commission Settings</h3>
+                <p class="mt-1 text-sm text-gray-500">
+                    Configure commission rates and payout thresholds for the platform
+                </p>
+            </div>
+            
+            <form method="post" class="p-6">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Agent Commission Rate
+                        </label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">%</span>
+                            </div>
+                            <input type="number" name="agent_commission_rate" 
+                                   value="{{ global_settings.agent_commission_rate|mul:100 }}"
+                                   step="0.01" min="0" max="100" required
+                                   class="block w-full pl-8 pr-3 py-2 border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Percentage of booking amount charged to agents (current: {{ global_settings.agent_commission_rate|mul:100 }}%)
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Customer Commission Rate
+                        </label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">%</span>
+                            </div>
+                            <input type="number" name="customer_commission_rate" 
+                                   value="{{ global_settings.customer_commission_rate|mul:100 }}"
+                                   step="0.01" min="0" max="100" required
+                                   class="block w-full pl-8 pr-3 py-2 border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Percentage of booking amount charged to customers (current: {{ global_settings.customer_commission_rate|mul:100 }}%)
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Minimum Payout Threshold
+                        </label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">$</span>
+                            </div>
+                            <input type="number" name="minimum_payout_threshold" 
+                                   value="{{ global_settings.minimum_payout_threshold }}"
+                                   step="0.01" min="0" required
+                                   class="block w-full pl-8 pr-3 py-2 border-gray-300 rounded-md focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Minimum amount agents must accumulate before requesting payout
+                        </p>
+                    </div>
+
+                    <div class="flex items-end">
+                        <button type="submit" 
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                            <i class="fas fa-save mr-2"></i>
+                            Save Settings
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Commission Statistics -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <!-- Total Agent Commissions -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                        <i class="fas fa-hand-holding-usd text-green-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Agent Commissions</p>
+                        <p class="text-2xl font-semibold text-gray-900">${{ total_agent_commissions|floatformat:2 }}</p>
+                        <p class="text-sm text-gray-500">Paid out to agents</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Platform Commissions -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                        <i class="fas fa-chart-line text-blue-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Platform Revenue</p>
+                        <p class="text-2xl font-semibold text-gray-900">${{ total_platform_commissions|floatformat:2 }}</p>
+                        <p class="text-sm text-gray-500">Total platform earnings</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Payouts -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-yellow-100 rounded-lg p-3">
+                        <i class="fas fa-clock text-yellow-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Pending Payouts</p>
+                        <p class="text-2xl font-semibold text-gray-900">${{ pending_payouts|floatformat:2 }}</p>
+                        <p class="text-sm text-gray-500">Awaiting processing</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Commission Breakdown -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Commission Breakdown</h3>
+                <p class="mt-1 text-sm text-gray-500">
+                    How commissions are calculated and distributed
+                </p>
+            </div>
+            
+            <div class="p-6">
+                <div class="space-y-6">
+                    <!-- Agent Commission Flow -->
+                    <div class="border-l-4 border-green-500 pl-4">
+                        <h4 class="text-base font-medium text-gray-900 mb-2">Agent Commission Flow</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <span class="text-xs font-medium text-blue-800">1</span>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm text-gray-900">Customer makes booking payment</p>
+                                    <p class="text-xs text-gray-500">Total booking amount received</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <span class="text-xs font-medium text-blue-800">2</span>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm text-gray-900">Platform calculates commissions</p>
+                                    <p class="text-xs text-gray-500">
+                                        Agent: {{ global_settings.agent_commission_rate|mul:100 }}% 
+                                        | Customer: {{ global_settings.customer_commission_rate|mul:100 }}%
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <span class="text-xs font-medium text-blue-800">3</span>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm text-gray-900">Agent commission added to pending payouts</p>
+                                    <p class="text-xs text-gray-500">Accumulated until threshold reached</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                                    <span class="text-xs font-medium text-green-800">4</span>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm text-gray-900">Agent requests payout</p>
+                                    <p class="text-xs text-gray-500">When minimum threshold is reached</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Platform Revenue Flow -->
+                    <div class="border-l-4 border-blue-500 pl-4">
+                        <h4 class="text-base font-medium text-gray-900 mb-2">Platform Revenue Flow</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <span class="text-xs font-medium text-blue-800">1</span>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm text-gray-900">Customer commission collected</p>
+                                    <p class="text-xs text-gray-500">{{ global_settings.customer_commission_rate|mul:100 }}% of booking</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center">
+                                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                                    <span class="text-xs font-medium text-blue-800">2</span>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm text-gray-900">Platform service fee retained</p>
+                                    <p class="text-xs text-gray-500">Remaining amount after commissions</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Commission Activity -->
+        <div class="bg-white rounded-lg shadow mt-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Recent Commission Activity</h3>
+                <p class="mt-1 text-sm text-gray-500">
+                    Latest commission calculations and payouts
+                </p>
+            </div>
+            
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Date
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Agent
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Booking Amount
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Agent Commission
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Platform Commission
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <!-- Mock data - would come from actual commission records -->
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    Nov 15, 2024
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900">Travel Experts Inc.</div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    $2,500.00
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">
+                                    $50.00 (2%)
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
+                                    $25.00 (1%)
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        Pending
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

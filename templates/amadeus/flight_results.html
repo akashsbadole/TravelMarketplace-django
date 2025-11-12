@@ -1,0 +1,543 @@
+{% extends 'base.html' %}
+{% block title %}Flight Results - Travel Marketplace{% endblock %}
+
+{% block extra_css %}
+<style>
+.flight-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.flight-card:hover {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.flight-card.selected {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.segment-timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.segment-timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 20px;
+    bottom: 0;
+    width: 2px;
+    background: #e5e7eb;
+}
+
+.segment-timeline:last-child::before {
+    display: none;
+}
+
+.segment-dot {
+    position: absolute;
+    left: 6px;
+    top: 20px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #4f46e5;
+    border: 2px solid white;
+}
+
+.filter-sidebar {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 20px;
+    position: sticky;
+    top: 20px;
+}
+
+.price-slider {
+    margin: 20px 0;
+}
+
+.airline-logo {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+}
+
+.duration-badge {
+    background: #f3f4f6;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.85em;
+}
+
+.stops-indicator {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.85em;
+}
+
+.stops-direct {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.stops-one-stop {
+    background: #fed7aa;
+    color: #92400e;
+}
+
+.stops-multi-stop {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.sort-dropdown {
+    min-width: 200px;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.flight-summary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.price-highlight {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #059669;
+}
+
+.baggage-info {
+    font-size: 0.85em;
+    color: #6b7280;
+}
+
+.seat-class-badge {
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Flight Summary -->
+    <div class="flight-summary">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h3 mb-2">
+                    <strong>{{ search.origin.iata_code }}</strong> → <strong>{{ search.destination.iata_code }}</strong>
+                </h1>
+                <p class="mb-0">
+                    {{ search.departure_date|date:"F j, Y" }}
+                    {% if search.return_date %} - {{ search.return_date|date:"F j, Y" }}{% endif %}
+                    • {{ search.adults }} Adult{{ search.adults|pluralize }}
+                    {% if search.children %}• {{ search.children }} Child{{ search.children|pluralize }}{% endif %}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="text-muted">{{ offers.count }} flights found</div>
+                <a href="{% url 'amadeus:flight_search' %}" class="btn btn-light btn-sm">
+                    <i class="fas fa-search me-2"></i>Modify Search
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-lg-3">
+            <div class="filter-sidebar">
+                <h5 class="mb-4">Filters</h5>
+                
+                <!-- Price Range -->
+                <div class="mb-4">
+                    <label class="form-label">Price Range</label>
+                    <div class="price-slider">
+                        <input type="range" class="form-range" id="priceRange" 
+                               min="{{ min_price }}" max="{{ max_price }}" 
+                               value="{{ max_price }}" step="10">
+                        <div class="d-flex justify-content-between">
+                            <span>${{ min_price|int }}</span>
+                            <span id="maxPriceLabel">${{ max_price|int }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Stops -->
+                <div class="mb-4">
+                    <label class="form-label">Stops</label>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="stopsDirect" checked>
+                        <label class="form-check-label" for="stopsDirect">
+                            Direct ({{ offers|filter_stops:0|length }})
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="stopsOneStop" checked>
+                        <label class="form-check-label" for="stopsOneStop">
+                            1 Stop ({{ offers|filter_stops:1|length }})
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="stopsMultiStop" checked>
+                        <label class="form-check-label" for="stopsMultiStop">
+                            2+ Stops ({{ offers|filter_stops:2|length }})
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Airlines -->
+                <div class="mb-4">
+                    <label class="form-label">Airlines</label>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        {% for airline in airlines %}
+                        <div class="form-check">
+                            <input class="form-check-input airline-filter" type="checkbox" 
+                                   value="{{ airline.id }}" checked>
+                            <label class="form-check-label" for="airline{{ airline.id }}">
+                                {{ airline.name }} ({{ airline.iata_code }})
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Departure Time -->
+                <div class="mb-4">
+                    <label class="form-label">Departure Time</label>
+                    <select class="form-select" id="departureTimeFilter">
+                        <option value="">Any Time</option>
+                        <option value="morning">Morning (6AM-12PM)</option>
+                        <option value="afternoon">Afternoon (12PM-6PM)</option>
+                        <option value="evening">Evening (6PM-12AM)</option>
+                        <option value="night">Night (12AM-6AM)</option>
+                    </select>
+                </div>
+                
+                <!-- Duration -->
+                <div class="mb-4">
+                    <label class="form-label">Max Duration</label>
+                    <select class="form-select" id="durationFilter">
+                        <option value="">Any Duration</option>
+                        <option value="5">Under 5 hours</option>
+                        <option value="10">Under 10 hours</option>
+                        <option value="15">Under 15 hours</option>
+                        <option value="20">Under 20 hours</option>
+                    </select>
+                </div>
+                
+                <!-- Reset Filters -->
+                <button class="btn btn-outline-secondary btn-sm w-100" onclick="resetFilters()">
+                    <i class="fas fa-undo me-2"></i>Reset Filters
+                </button>
+            </div>
+        </div>
+        
+        <!-- Results -->
+        <div class="col-lg-9">
+            <!-- Sort Options -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="text-muted">Showing <span id="resultCount">{{ offers.count }}</span> flights</div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-sort me-2"></i>Sort by
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="sortFlights('price')">Price (Low to High)</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="sortFlights('price_desc')">Price (High to Low)</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="sortFlights('duration')">Duration (Shortest)</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="sortFlights('departure')">Departure Time (Earliest)</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="sortFlights('arrival')">Arrival Time (Earliest)</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Flight Cards -->
+            <div id="flightResults">
+                {% for offer in offers %}
+                <div class="flight-card mb-4" 
+                     data-price="{{ offer.price_total }}"
+                     data-stops="{{ offer.number_of_stops }}"
+                     data-airlines="{{ offer.segments.all|join:','|attribute:'airline.id' }}"
+                     data-departure-time="{{ offer.segments.first.departure_time|date:'Hi' }}"
+                     data-duration="{{ offer.total_duration|div:60 }}"
+                     data-offer-id="{{ offer.id }}">
+                    
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <!-- Flight Details -->
+                            <div class="col-md-8">
+                                <div class="segment-timeline">
+                                    {% for segment in offer.segments.all %}
+                                    <div class="mb-3">
+                                        <div class="segment-dot"></div>
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <div class="d-flex align-items-center mb-2">
+                                                    <img src="https://picsum.photos/seed/{{ segment.airline.iata_code }}/30/30.jpg" 
+                                                         alt="{{ segment.airline.name }}" 
+                                                         class="airline-logo me-2">
+                                                    <div>
+                                                        <strong>{{ segment.airline.iata_code }}{{ segment.flight_number }}</strong>
+                                                        <span class="seat-class-badge ms-2">{{ segment.cabin_class }}</span>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <div class="text-muted small">{{ segment.departure_airport.iata_code }}</div>
+                                                        <div class="fw-bold">{{ segment.departure_time|date:"H:i" }}</div>
+                                                        <div class="text-muted small">{{ segment.departure_time|date:"M d" }}</div>
+                                                    </div>
+                                                    <div class="col-6 text-end">
+                                                        <div class="text-muted small">{{ segment.arrival_airport.iata_code }}</div>
+                                                        <div class="fw-bold">{{ segment.arrival_time|date:"H:i" }}</div>
+                                                        <div class="text-muted small">{{ segment.arrival_time|date:"M d" }}</div>
+                                                    </div>
+                                                </div>
+                                                {% if not forloop.last %}
+                                                <div class="text-center text-muted small my-2">
+                                                    <i class="fas fa-clock me-1"></i>
+                                                    Layover: {{ segment.layover_duration|default:"--" }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                <!-- Flight Info -->
+                                <div class="d-flex align-items-center mt-3">
+                                    <span class="stops-indicator {% if offer.number_of_stops == 0 %}stops-direct{% elif offer.number_of_stops == 1 %}stops-one-stop{% else %}stops-multi-stop{% endif %}">
+                                        {% if offer.number_of_stops == 0 %}Direct{% else %}{{ offer.number_of_stops }} Stop{{ offer.number_of_stops|pluralize }}{% endif %}
+                                    </span>
+                                    <span class="duration-badge ms-2">
+                                        <i class="fas fa-clock me-1"></i>
+                                        {{ offer.total_duration|duration_format }}
+                                    </span>
+                                    <div class="baggage-info ms-3">
+                                        <i class="fas fa-suitcase me-1"></i>
+                                        {{ offer.baggage_allowance|default:"Included" }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Price and Actions -->
+                            <div class="col-md-4 text-md-end">
+                                <div class="price-highlight">${{ offer.price_total }}</div>
+                                <div class="text-muted small mb-3">{{ offer.price_currency }}</div>
+                                
+                                <div class="mb-2">
+                                    {% if offer.is_refundable %}
+                                    <span class="badge bg-success me-1">Refundable</span>
+                                    {% endif %}
+                                    {% if offer.raw_data.pricingOptions.fareType == "PUBLISHED" %}
+                                    <span class="badge bg-info me-1">Published Fare</span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-primary" onclick="selectFlight({{ offer.id }})">
+                                        Select Flight
+                                    </button>
+                                    <a href="{% url 'amadeus:flight_detail' offer.id %}" 
+                                       class="btn btn-outline-secondary btn-sm">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- No Results Message -->
+            <div id="noResults" class="text-center py-8" style="display: none;">
+                <i class="fas fa-search text-muted" style="font-size: 4rem;"></i>
+                <h4 class="mt-4">No flights found</h4>
+                <p class="text-muted">Try adjusting your filters or search criteria</p>
+                <button class="btn btn-primary" onclick="resetFilters()">Reset Filters</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay" style="display: none;">
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <div class="mt-3">Processing your selection...</div>
+    </div>
+</div>
+
+<script>
+let selectedFlightId = null;
+
+// Price range slider
+document.getElementById('priceRange').addEventListener('input', function() {
+    document.getElementById('maxPriceLabel').textContent = '$' + this.value;
+    applyFilters();
+});
+
+// Filter functions
+function applyFilters() {
+    const maxPrice = parseFloat(document.getElementById('priceRange').value);
+    const stopsDirect = document.getElementById('stopsDirect').checked;
+    const stopsOneStop = document.getElementById('stopsOneStop').checked;
+    const stopsMultiStop = document.getElementById('stopsMultiStop').checked;
+    const departureTime = document.getElementById('departureTimeFilter').value;
+    const maxDuration = document.getElementById('durationFilter').value;
+    
+    // Get selected airlines
+    const selectedAirlines = Array.from(document.querySelectorAll('.airline-filter:checked'))
+        .map(cb => cb.value);
+    
+    const flightCards = document.querySelectorAll('.flight-card');
+    let visibleCount = 0;
+    
+    flightCards.forEach(card => {
+        let show = true;
+        
+        // Price filter
+        if (parseFloat(card.dataset.price) > maxPrice) {
+            show = false;
+        }
+        
+        // Stops filter
+        const stops = parseInt(card.dataset.stops);
+        if (stops === 0 && !stopsDirect) show = false;
+        if (stops === 1 && !stopsOneStop) show = false;
+        if (stops >= 2 && !stopsMultiStop) show = false;
+        
+        // Airline filter
+        const cardAirlines = card.dataset.airlines.split(',');
+        if (!cardAirlines.some(airline => selectedAirlines.includes(airline))) {
+            show = false;
+        }
+        
+        // Departure time filter
+        if (departureTime) {
+            const hour = parseInt(card.dataset.departureTime);
+            if (departureTime === 'morning' && (hour < 6 || hour >= 12)) show = false;
+            if (departureTime === 'afternoon' && (hour < 12 || hour >= 18)) show = false;
+            if (departureTime === 'evening' && (hour < 18 || hour >= 24)) show = false;
+            if (departureTime === 'night' && (hour < 0 || hour >= 6)) show = false;
+        }
+        
+        // Duration filter
+        if (maxDuration && parseFloat(card.dataset.duration) > maxDuration) {
+            show = false;
+        }
+        
+        card.style.display = show ? 'block' : 'none';
+        if (show) visibleCount++;
+    });
+    
+    // Update result count
+    document.getElementById('resultCount').textContent = visibleCount;
+    
+    // Show/hide no results message
+    document.getElementById('noResults').style.display = visibleCount === 0 ? 'block' : 'none';
+}
+
+function resetFilters() {
+    document.getElementById('priceRange').value = {{ max_price }};
+    document.getElementById('maxPriceLabel').textContent = '${{ max_price|int }}';
+    document.getElementById('stopsDirect').checked = true;
+    document.getElementById('stopsOneStop').checked = true;
+    document.getElementById('stopsMultiStop').checked = true;
+    document.getElementById('departureTimeFilter').value = '';
+    document.getElementById('durationFilter').value = '';
+    
+    document.querySelectorAll('.airline-filter').forEach(cb => cb.checked = true);
+    
+    applyFilters();
+}
+
+function sortFlights(sortBy) {
+    const container = document.getElementById('flightResults');
+    const cards = Array.from(container.querySelectorAll('.flight-card'));
+    
+    cards.sort((a, b) => {
+        switch(sortBy) {
+            case 'price':
+                return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+            case 'price_desc':
+                return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+            case 'duration':
+                return parseFloat(a.dataset.duration) - parseFloat(b.dataset.duration);
+            case 'departure':
+                return a.dataset.departureTime.localeCompare(b.dataset.departureTime);
+            case 'arrival':
+                // For arrival time, we'd need to calculate it from segments
+                return parseFloat(a.dataset.price) - parseFloat(b.dataset.price); // Fallback
+            default:
+                return 0;
+        }
+    });
+    
+    // Re-append sorted cards
+    cards.forEach(card => container.appendChild(card));
+}
+
+function selectFlight(offerId) {
+    // Remove previous selection
+    document.querySelectorAll('.flight-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    // Add selection to clicked card
+    const selectedCard = document.querySelector(`[data-offer-id="${offerId}"]`);
+    selectedCard.classList.add('selected');
+    
+    selectedFlightId = offerId;
+    
+    // Show loading
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    
+    // Redirect to booking page after a short delay
+    setTimeout(() => {
+        window.location.href = `/bookings/create/${offerId}/`;
+    }, 1500);
+}
+
+// Event listeners for filters
+document.querySelectorAll('.airline-filter, #stopsDirect, #stopsOneStop, #stopsMultiStop, #departureTimeFilter, #durationFilter').forEach(element => {
+    element.addEventListener('change', applyFilters);
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    applyFilters();
+});
+</script>
+{% endblock %}

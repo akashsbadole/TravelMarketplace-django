@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+{% block title %}Create Quote - Agent Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Create Quote</h1>
+            <p class="mt-2 text-gray-600">
+                Create a detailed quote for: {{ requirement.title }}
+            </p>
+        </div>
+        
+        <!-- Requirement Summary -->
+        <div class="bg-white shadow rounded-lg mb-6 p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">Requirement Details</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Service Type:</span>
+                    <p class="text-lg font-semibold text-gray-900">{{ requirement.service_type.name }}</p>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Destination:</span>
+                    <p class="text-lg font-semibold text-gray-900">{{ requirement.destination }}</p>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Travel Dates:</span>
+                    <p class="text-lg font-semibold text-gray-900">
+                        {{ requirement.travel_date_start|date:"M d, Y" }} - {{ requirement.travel_date_end|date:"M d, Y" }}
+                    </p>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Number of Travelers:</span>
+                    <p class="text-lg font-semibold text-gray-900">
+                        {{ requirement.number_of_adults }} Adults
+                        {% if requirement.number_of_children > 0 %}
+                        , {{ requirement.number_of_children }} Children
+                        {% endif %}
+                        {% if requirement.number_of_infants > 0 %}
+                        , {{ requirement.number_of_infants }} Infants
+                        {% endif %}
+                    </p>
+                </div>
+                <div>
+                    <span class="text-sm font-medium text-gray-500">Budget:</span>
+                    <p class="text-lg font-semibold text-gray-900">
+                        {% if requirement.budget_min and requirement.budget_max %}
+                            ${{ requirement.budget_min|floatformat:0 }} - ${{ requirement.budget_max|floatformat:0 }}
+                        {% elif requirement.budget_max %}
+                            Up to ${{ requirement.budget_max|floatformat:0 }}
+                        {% else %}
+                            No budget set
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            
+            {% if requirement.description %}
+            <div class="mt-6">
+                <span class="text-sm font-medium text-gray-500">Description:</span>
+                <p class="mt-1 text-gray-900">{{ requirement.description }}</p>
+            </div>
+            {% endif %}
+            
+            {% if requirement.additional_requirements %}
+            <div class="mt-6">
+                <span class="text-sm font-medium text-gray-500">Additional Requirements:</span>
+                <p class="mt-1 text-gray-900">{{ requirement.additional_requirements }}</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Quote Form -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Quote Details</h2>
+            </div>
+            
+            <form method="post" class="p-6 space-y-6">
+                {% csrf_token %}
+                
+                <!-- Quote Items -->
+                <div class="mb-8">
+                    <h3 class="text-md font-medium text-gray-900 mb-4">Quote Items</h3>
+                    <div id="quote-items" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4 text-sm font-medium text-gray-700">
+                            <div>Service</div>
+                            <div>Description</div>
+                            <div>Quantity</div>
+                            <div>Unit Price</div>
+                            <div>Subtotal</div>
+                            <div>Actions</div>
+                        </div>
+                        
+                        <div class="quote-item grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <select name="service_type_0" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <option value="">Select Service</option>
+                                    {% for service in service_types %}
+                                    <option value="{{ service.id }}">{{ service.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <input type="text" name="description_0" placeholder="Enter description" 
+                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <input type="number" name="quantity_0" min="1" value="1" 
+                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <input type="number" name="unit_price_0" min="0" step="0.01" placeholder="0.00" 
+                                       class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div class="subtotal-display">
+                                $0.00
+                            </div>
+                            <div>
+                                <button type="button" onclick="removeQuoteItem(0)" 
+                                        class="text-red-600 hover:text-red-800">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="button" onclick="addQuoteItem()" 
+                            class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                        <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8v12m-9 4h6m2 5H7a2 2 0 01-2-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" />
+                        </svg>
+                        Add Item
+                    </button>
+                </div>
+                
+                <!-- Quote Summary -->
+                <div class="border-t border-gray-200 pt-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Total Amount</label>
+                            <div class="mt-1 relative rounded-md shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 sm:text-sm">$</span>
+                                </div>
+                                <input type="number" name="total_amount" id="total_amount" readonly
+                                       class="block w-full pl-8 pr-3 py-2 border-gray-300 rounded-md bg-gray-50 text-gray-900"
+                                       value="0.00">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Valid Until</label>
+                            <input type="date" name="valid_until" 
+                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notes and Terms -->
+                <div class="mt-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Notes to Customer</label>
+                        <textarea name="notes" rows="4" 
+                                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                  placeholder="Add any notes or special instructions for the customer..."></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">What's Included</label>
+                        <textarea name="inclusions" rows="4" 
+                                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                  placeholder="List all services included in this quote..."></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">What's Not Included</label>
+                        <textarea name="exclusions" rows="4" 
+                                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                  placeholder="List services not included in this quote..."></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Terms & Conditions</label>
+                        <textarea name="terms_and_conditions" rows="4" 
+                                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                  placeholder="Enter terms and conditions for this quote..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Submit Buttons -->
+                <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                    <button type="button" 
+                            onclick="window.history.back()"
+                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md font-medium transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                        Submit Quote
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+let quoteItemCount = 0;
+
+function addQuoteItem() {
+    const container = document.getElementById('quote-items');
+    const newItem = document.createElement('div');
+    newItem.className = 'quote-item grid grid-cols-1 md:grid-cols-5 gap-4 p-4 bg-gray-50 rounded-lg';
+    newItem.innerHTML = `
+        <div>
+            <select name="service_type_${quoteItemCount}" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <option value="">Select Service</option>
+                {% for service in service_types %}
+                <option value="{{ service.id }}">{{ service.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <input type="text" name="description_${quoteItemCount}" placeholder="Enter description" 
+                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+        <div>
+            <input type="number" name="quantity_${quoteItemCount}" min="1" value="1" 
+                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+        <div>
+            <input type="number" name="unit_price_${quoteItemCount}" min="0" step="0.01" placeholder="0.00" 
+                   class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </div>
+        <div class="subtotal-display">
+            $0.00
+        </div>
+        <div>
+            <button type="button" onclick="removeQuoteItem(${quoteItemCount})" 
+                    class="text-red-600 hover:text-red-800">
+                Remove
+            </button>
+        </div>
+    `;
+    
+    container.appendChild(newItem);
+    quoteItemCount++;
+    updateQuoteItemEventListeners();
+}
+
+function removeQuoteItem(index) {
+    const container = document.getElementById('quote-items');
+    const items = container.querySelectorAll('.quote-item');
+    
+    if (items[index]) {
+        items[index].remove();
+        quoteItemCount--;
+        updateQuoteItemEventListeners();
+    }
+}
+
+function updateQuoteItemEventListeners() {
+    const items = document.querySelectorAll('.quote-item');
+    
+    items.forEach((item, index) => {
+        const serviceSelect = item.querySelector(`select[name="service_type_${index}"]`);
+        const descriptionInput = item.querySelector(`input[name="description_${index}"]`);
+        const quantityInput = item.querySelector(`input[name="quantity_${index}"]`);
+        const unitPriceInput = item.querySelector(`input[name="unit_price_${index}"]`);
+        const subtotalDisplay = item.querySelector('.subtotal-display');
+        
+        [serviceSelect, descriptionInput, quantityInput, unitPriceInput].forEach(element => {
+            element.addEventListener('input', calculateTotal);
+        });
+    });
+}
+
+function calculateTotal() {
+    let total = 0;
+    
+    for (let i = 0; i < quoteItemCount; i++) {
+        const quantity = parseFloat(document.querySelector(`input[name="quantity_${i}"]`).value) || 0;
+        const unitPrice = parseFloat(document.querySelector(`input[name="unit_price_${i}"]`).value) || 0;
+        total += quantity * unitPrice;
+    }
+    
+    document.getElementById('total_amount').value = total.toFixed(2);
+    
+    // Update all subtotal displays
+    for (let i = 0; i < quoteItemCount; i++) {
+        const quantity = parseFloat(document.querySelector(`input[name="quantity_${i}"]`).value) || 0;
+        const unitPrice = parseFloat(document.querySelector(`input[name="unit_price_${i}"]`).value) || 0;
+        const subtotal = quantity * unitPrice;
+        const subtotalDisplay = document.querySelectorAll('.subtotal-display')[i];
+        if (subtotalDisplay) {
+            subtotalDisplay.textContent = `$${subtotal.toFixed(2)}`;
+        }
+    }
+}
+</script>
+{% endblock %}

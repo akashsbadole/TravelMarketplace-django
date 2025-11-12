@@ -1,0 +1,545 @@
+{% extends 'base.html' %}
+{% block title %}{{ agent.company_name }} Reviews - Travel Marketplace{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Agent Header -->
+        <div class="bg-white shadow rounded-lg p-6 mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-6">
+                    <img class="h-24 w-24 rounded-full" 
+                         src="https://picsum.photos/seed/{{ agent.user.username }}/200/200.jpg" 
+                         alt="{{ agent.company_name }}">
+                    
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900">{{ agent.company_name }}</h1>
+                        <p class="text-lg text-gray-600">{{ agent.specializations.all|join:", " }}</p>
+                        
+                        <!-- Overall Rating -->
+                        <div class="flex items-center mt-3">
+                            <div class="flex items-center">
+                                {% for i in 5|range_rev %}
+                                    {% if i < agent.average_rating %}
+                                    <i class="fas fa-star text-yellow-400 text-xl"></i>
+                                    {% else %}
+                                    <i class="far fa-star text-gray-300 text-xl"></i>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            <span class="ml-3 text-2xl font-bold text-gray-700">
+                                {{ agent.average_rating|floatformat:1 }}
+                            </span>
+                            <span class="ml-2 text-gray-500">
+                                ({{ total_reviews }} reviews)
+                            </span>
+                        </div>
+                        
+                        <!-- Verification Status -->
+                        {% if agent.is_verified %}
+                        <div class="flex items-center mt-2">
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                            <span class="text-sm text-green-700 font-medium">Verified Agent</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="text-right">
+                    <div class="text-sm text-gray-500">Member Since</div>
+                    <div class="text-lg font-medium text-gray-900">{{ agent.created_at|date:"F Y" }}</div>
+                    <div class="text-sm text-gray-500 mt-2">{{ agent.total_bookings }} Bookings</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Rating Breakdown -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <!-- Rating Distribution -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Rating Distribution</h2>
+                <div class="space-y-3">
+                    {% for rating in 5|range_rev_rev %}
+                    <div class="flex items-center">
+                        <span class="text-sm text-gray-600 w-12">{{ rating }} stars</span>
+                        <div class="flex-1 mx-3">
+                            <div class="bg-gray-200 rounded-full h-2">
+                                <div class="bg-yellow-400 h-2 rounded-full" 
+                                     style="width: {% widthratio rating_counts.rating rating_counts.total 100 %}%"></div>
+                            </div>
+                        </div>
+                        <span class="text-sm text-gray-600 w-12 text-right">
+                            {{ rating_counts.rating }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Detailed Ratings -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Detailed Ratings</h2>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Communication</span>
+                        <div class="flex items-center">
+                            {% for i in 5|range_rev %}
+                                {% if i < agent.communication_rating %}
+                                <i class="fas fa-star text-yellow-400 text-sm"></i>
+                                {% else %}
+                                <i class="far fa-star text-gray-300 text-sm"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="ml-2 text-sm font-medium">{{ agent.communication_rating|floatformat:1 }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Value for Money</span>
+                        <div class="flex items-center">
+                            {% for i in 5|range_rev %}
+                                {% if i < agent.value_rating %}
+                                <i class="fas fa-star text-yellow-400 text-sm"></i>
+                                {% else %}
+                                <i class="far fa-star text-gray-300 text-sm"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="ml-2 text-sm font-medium">{{ agent.value_rating|floatformat:1 }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Service Quality</span>
+                        <div class="flex items-center">
+                            {% for i in 5|range_rev %}
+                                {% if i < agent.quality_rating %}
+                                <i class="fas fa-star text-yellow-400 text-sm"></i>
+                                {% else %}
+                                <i class="far fa-star text-gray-300 text-sm"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="ml-2 text-sm font-medium">{{ agent.quality_rating|floatformat:1 }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Punctuality</span>
+                        <div class="flex items-center">
+                            {% for i in 5|range_rev %}
+                                {% if i < agent.punctuality_rating %}
+                                <i class="fas fa-star text-yellow-400 text-sm"></i>
+                                {% else %}
+                                <i class="far fa-star text-gray-300 text-sm"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="ml-2 text-sm font-medium">{{ agent.punctuality_rating|floatformat:1 }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Professionalism</span>
+                        <div class="flex items-center">
+                            {% for i in 5|range_rev %}
+                                {% if i < agent.professionalism_rating %}
+                                <i class="fas fa-star text-yellow-400 text-sm"></i>
+                                {% else %}
+                                <i class="far fa-star text-gray-300 text-sm"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="ml-2 text-sm font-medium">{{ agent.professionalism_rating|floatformat:1 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="bg-white shadow rounded-lg p-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Quick Stats</h2>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Total Reviews</span>
+                        <span class="text-lg font-semibold">{{ total_reviews }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Response Rate</span>
+                        <span class="text-lg font-semibold">{{ agent.response_rate }}%</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Avg. Response Time</span>
+                        <span class="text-lg font-semibold">{{ agent.avg_response_time }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">On-time Delivery</span>
+                        <span class="text-lg font-semibold">{{ agent.on_time_delivery }}%</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Repeat Customers</span>
+                        <span class="text-lg font-semibold">{{ agent.repeat_customers }}%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filter Tabs -->
+        <div class="bg-white shadow rounded-lg mb-6">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8 px-6" aria-label="Tabs">
+                    <button onclick="filterReviews('all')" 
+                            class="filter-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                            data-filter="all">
+                        All Reviews
+                        <span class="bg-gray-100 text-gray-900 ml-2 py-0.5 px-2.5 rounded-full text-xs">
+                            {{ reviews.count }}
+                        </span>
+                    </button>
+                    <button onclick="filterReviews('5')" 
+                            class="filter-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                            data-filter="5">
+                        5 Stars
+                    </button>
+                    <button onclick="filterReviews('4')" 
+                            class="filter-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                            data-filter="4">
+                        4 Stars
+                    </button>
+                    <button onclick="filterReviews('3')" 
+                            class="filter-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                            data-filter="3">
+                        3 Stars
+                    </button>
+                    <button onclick="filterReviews('2')" 
+                            class="filter-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                            data-filter="2">
+                        2 Stars
+                    </button>
+                    <button onclick="filterReviews('1')" 
+                            class="filter-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                            data-filter="1">
+                        1 Star
+                    </button>
+                    <button onclick="filterReviews('featured')" 
+                            class="filter-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+                            data-filter="featured">
+                        Featured
+                    </button>
+                </nav>
+            </div>
+        </div>
+        
+        <!-- Reviews List -->
+        <div class="bg-white shadow overflow-hidden rounded-md">
+            {% if reviews %}
+            <div class="divide-y divide-gray-200">
+                {% for review in reviews %}
+                <div class="p-6 hover:bg-gray-50 transition-colors" data-rating="{{ review.rating }}" data-featured="{% if review.is_featured %}true{% else %}false{% endif %}">
+                    <div class="flex space-x-4">
+                        <!-- Customer Info -->
+                        <div class="flex-shrink-0">
+                            <img class="h-12 w-12 rounded-full" 
+                                 src="https://picsum.photos/seed/{{ review.customer.username }}/100/100.jpg" 
+                                 alt="{{ review.customer.get_full_name|default:review.customer.username }}">
+                        </div>
+                        
+                        <div class="flex-1 min-w-0">
+                            <!-- Review Header -->
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-lg font-medium text-gray-900">
+                                        {{ review.title }}
+                                    </h3>
+                                    <div class="flex items-center mt-1">
+                                        <!-- Overall Rating -->
+                                        <div class="flex items-center">
+                                            {% for i in 5|range_rev %}
+                                                {% if i < review.rating %}
+                                                <i class="fas fa-star text-yellow-400"></i>
+                                                {% else %}
+                                                <i class="far fa-star text-gray-300"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        <span class="ml-2 text-sm text-gray-500">
+                                            {{ review.created_at|date:"F j, Y" }}
+                                        </span>
+                                    </div>
+                                    
+                                    <!-- Service Type -->
+                                    {% if review.service_type %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        {{ review.service_type.name }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <!-- Actions -->
+                                <div class="flex items-center space-x-2">
+                                    {% if review.is_featured %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <i class="fas fa-star mr-1"></i>
+                                        Featured
+                                    </span>
+                                    {% endif %}
+                                    
+                                    {% if review.is_verified %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <i class="fas fa-check mr-1"></i>
+                                        Verified
+                                    </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Review Content -->
+                            <p class="mt-2 text-gray-700">
+                                {{ review.content }}
+                            </p>
+                            
+                            <!-- Detailed Ratings -->
+                            {% if review.communication_rating or review.value_rating or review.quality_rating or review.punctuality_rating or review.professionalism_rating %}
+                            <div class="mt-3 grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {% if review.communication_rating %}
+                                <div>
+                                    <div class="text-sm text-gray-500">Communication</div>
+                                    <div class="flex items-center mt-1">
+                                        {% for i in 5|range_rev %}
+                                            {% if i < review.communication_rating %}
+                                            <i class="fas fa-star text-yellow-400 text-sm"></i>
+                                            {% else %}
+                                            <i class="far fa-star text-gray-300 text-sm"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if review.value_rating %}
+                                <div>
+                                    <div class="text-sm text-gray-500">Value</div>
+                                    <div class="flex items-center mt-1">
+                                        {% for i in 5|range_rev %}
+                                            {% if i < review.value_rating %}
+                                            <i class="fas fa-star text-yellow-400 text-sm"></i>
+                                            {% else %}
+                                            <i class="far fa-star text-gray-300 text-sm"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if review.quality_rating %}
+                                <div>
+                                    <div class="text-sm text-gray-500">Quality</div>
+                                    <div class="flex items-center mt-1">
+                                        {% for i in 5|range_rev %}
+                                            {% if i < review.quality_rating %}
+                                            <i class="fas fa-star text-yellow-400 text-sm"></i>
+                                            {% else %}
+                                            <i class="far fa-star text-gray-300 text-sm"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if review.punctuality_rating %}
+                                <div>
+                                    <div class="text-sm text-gray-500">Punctuality</div>
+                                    <div class="flex items-center mt-1">
+                                        {% for i in 5|range_rev %}
+                                            {% if i < review.punctuality_rating %}
+                                            <i class="fas fa-star text-yellow-400 text-sm"></i>
+                                            {% else %}
+                                            <i class="far fa-star text-gray-300 text-sm"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if review.professionalism_rating %}
+                                <div>
+                                    <div class="text-sm text-gray-500">Professionalism</div>
+                                    <div class="flex items-center mt-1">
+                                        {% for i in 5|range_rev %}
+                                            {% if i < review.professionalism_rating %}
+                                            <i class="fas fa-star text-yellow-400 text-sm"></i>
+                                            {% else %}
+                                            <i class="far fa-star text-gray-300 text-sm"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Agent Response -->
+                            {% if review.agent_response %}
+                            <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                                <div class="flex items-start space-x-3">
+                                    <div class="flex-shrink-0">
+                                        <img class="h-8 w-8 rounded-full" 
+                                             src="https://picsum.photos/seed/{{ review.agent.user.username }}/100/100.jpg" 
+                                             alt="{{ review.agent.user.get_full_name|default:review.agent.user.username }}">
+                                    </div>
+                                    <div class="flex-1">
+                                        <div class="flex items-center justify-between">
+                                            <h4 class="text-sm font-medium text-blue-900">
+                                                Response from {{ review.agent.company_name }}
+                                            </h4>
+                                            <span class="text-xs text-blue-700">
+                                                {{ review.agent_response_date|date:"M d, Y" }}
+                                            </span>
+                                        </div>
+                                        <p class="text-sm text-blue-800 mt-1">
+                                            {{ review.agent_response }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Actions -->
+                            <div class="mt-4 flex items-center justify-between">
+                                <div class="flex items-center space-x-4">
+                                    <!-- Helpful Button -->
+                                    <button onclick="toggleHelpful({{ review.id }}, this)" 
+                                            class="flex items-center text-sm text-gray-500 hover:text-gray-700">
+                                        <i class="fas fa-thumbs-up mr-1"></i>
+                                        <span id="helpful-count-{{ review.id }}">Helpful ({{ review.helpful_count }})</span>
+                                    </button>
+                                    
+                                    <!-- Report Button -->
+                                    <button onclick="reportReview({{ review.id }})" 
+                                            class="flex items-center text-sm text-gray-500 hover:text-red-700">
+                                        <i class="fas fa-flag mr-1"></i>
+                                        Report
+                                    </button>
+                                </div>
+                                
+                                <!-- View Details -->
+                                <a href="{% url 'reviews:review_detail' review.id %}" 
+                                   class="text-sm text-blue-600 hover:text-blue-800 font-medium">
+                                    View Details
+                                    <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2 2v10a2 2 0 002 2h9.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No reviews found</h3>
+                <p class="mt-1 text-sm text-gray-500">
+                    No reviews match the current filters.
+                </p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+let currentFilter = 'all';
+
+function filterReviews(filter) {
+    currentFilter = filter;
+    
+    // Update tab styles
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        if (tab.dataset.filter == filter) {
+            tab.classList.add('border-blue-500', 'text-blue-600');
+            tab.classList.remove('border-transparent', 'text-gray-500');
+        } else {
+            tab.classList.remove('border-blue-500', 'text-blue-600');
+            tab.classList.add('border-transparent', 'text-gray-500');
+        }
+    });
+    
+    // Filter reviews
+    const reviewItems = document.querySelectorAll('[data-rating]');
+    reviewItems.forEach(item => {
+        let show = false;
+        
+        if (filter === 'all') {
+            show = true;
+        } else if (filter === 'featured') {
+            show = item.dataset.featured === 'true';
+        } else {
+            show = item.dataset.rating === filter;
+        }
+        
+        item.style.display = show ? 'block' : 'none';
+    });
+}
+
+function toggleHelpful(reviewId, button) {
+    fetch(`/reviews/${reviewId}/helpful/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const countSpan = document.getElementById(`helpful-count-${reviewId}`);
+            countSpan.textContent = `Helpful (${data.helpful_count})`;
+            button.disabled = true;
+            button.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+    });
+}
+
+function reportReview(reviewId) {
+    const reason = prompt('Please provide a reason for reporting this review:');
+    if (reason) {
+        fetch(`/reviews/${reviewId}/report/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                reason: reason,
+                description: reason
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Review has been reported and will be reviewed by our team.');
+            } else {
+                alert('Error reporting review: ' + data.message);
+            }
+        });
+    }
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Initialize with 'all' filter
+document.addEventListener('DOMContentLoaded', function() {
+    filterReviews('all');
+});
+</script>
+{% endblock %}

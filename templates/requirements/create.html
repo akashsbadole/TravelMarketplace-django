@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+{% block title %}Post Travel Requirement - Travel Marketplace{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="bg-white shadow mb-8">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-blue-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                            <path d="M9 2a1 1 0 000 2h2a1 1 0 000 2v2a1 1 0 00-2 2H9a1 1 0 00-2-2V2zM3 4a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1H3a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1H3a1 1 0 01-1-1v-6zM14 4a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 01-1 1h-2a1 1 0 01-1-1V4zM14 10a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h1 class="text-2xl font-bold text-gray-900">Post Your Travel Requirement</h1>
+                        <p class="mt-1 text-sm text-gray-600">Get quotes from verified travel agents for your next trip</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <!-- Service Type Selection -->
+                <div class="mb-8">
+                    <h2 class="text-lg font-medium text-gray-900 mb-4">What type of travel service do you need?</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="border rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-colors service-type" data-type="flight">
+                            <div class="text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12H9m-6 4h12m0 0v8m0 0H9" />
+                                </svg>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">Flight</h3>
+                                <p class="mt-1 text-xs text-gray-500">Book flights for domestic and international travel</p>
+                            </div>
+                        </div>
+                        <div class="border rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-colors service-type" data-type="hotel">
+                            <div class="text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m5-4h1m-1 4h1m-1 4h1m-1 4h1m-1 4h1M3 21h18M3 10h18M3 7l9-4 9-4" />
+                                </svg>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">Hotel</h3>
+                                <p class="mt-1 text-xs text-gray-500">Find accommodation for your stay</p>
+                            </div>
+                        </div>
+                        <div class="border rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-colors service-type" data-type="bus">
+                            <div class="text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h8m0 0l8 8m0-8l-8-8m8 8v8m0-8v8m0 0h-8m8 0h8" />
+                                </svg>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">Bus</h3>
+                                <p class="mt-1 text-xs text-gray-500">Book bus tickets for intercity travel</p>
+                            </div>
+                        </div>
+                        <div class="border rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-colors service-type" data-type="train">
+                            <div class="text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 01.532 16H4a1 1 0 01-1-1V6a1 1 0 011-1h4.532a1 1 0 01.979.276L9 4m0 0l6 6m-6-6l6 6" />
+                                </svg>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">Train</h3>
+                                <p class="mt-1 text-xs text-gray-500">Book train tickets for your journey</p>
+                            </div>
+                        </div>
+                        <div class="border rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-colors service-type" data-type="package">
+                            <div class="text-center">
+                                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m0 0l8-4-8 4m16 0l-8-4-8 4M4 7l8 4 8-4m0 0l-8 4-8-4" />
+                                </svg>
+                                <h3 class="mt-2 text-sm font-medium text-gray-900">Package</h3>
+                                <p class="mt-1 text-xs text-gray-500">Complete travel packages with flights, hotels & more</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Form -->
+                <form id="requirement-form" class="space-y-6">
+                    <!-- Flight Form -->
+                    <div id="flight-form" class="hidden form-section">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Flight Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="flight-origin" class="block text-sm font-medium text-gray-700">Origin</label>
+                                <input type="text" id="flight-origin" name="origin" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="flight-destination" class="block text-sm font-medium text-gray-700">Destination</label>
+                                <input type="text" id="flight-destination" name="destination" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="flight-departure-date" class="block text-sm font-medium text-gray-700">Departure Date</label>
+                                <input type="date" id="flight-departure-date" name="departure_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="flight-return-date" class="block text-sm font-medium text-gray-700">Return Date</label>
+                                <input type="date" id="flight-return-date" name="return_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="flight-passengers" class="block text-sm font-medium text-gray-700">Number of Passengers</label>
+                                <input type="number" id="flight-passengers" name="passengers" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="flight-class" class="block text-sm font-medium text-gray-700">Class</label>
+                                <select id="flight-class" name="class" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <option value="">Select class</option>
+                                    <option value="economy">Economy</option>
+                                    <option value="premium-economy">Premium Economy</option>
+                                    <option value="business">Business</option>
+                                    <option value="first">First</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hotel Form -->
+                    <div id="hotel-form" class="hidden form-section">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Hotel Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="hotel-destination" class="block text-sm font-medium text-gray-700">Destination</label>
+                                <input type="text" id="hotel-destination" name="destination" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="hotel-check-in" class="block text-sm font-medium text-gray-700">Check-in Date</label>
+                                <input type="date" id="hotel-check-in" name="check_in" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="hotel-check-out" class="block text-sm font-medium text-gray-700">Check-out Date</label>
+                                <input type="date" id="hotel-check-out" name="check_out" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="hotel-rooms" class="block text-sm font-medium text-gray-700">Number of Rooms</label>
+                                <input type="number" id="hotel-rooms" name="rooms" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="hotel-guests" class="block text-sm font-medium text-gray-700">Number of Guests</label>
+                                <input type="number" id="hotel-guests" name="guests" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="hotel-type" class="block text-sm font-medium text-gray-700">Room Type</label>
+                                <select id="hotel-type" name="room_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <option value="">Select room type</option>
+                                    <option value="standard">Standard</option>
+                                    <option value="deluxe">Deluxe</option>
+                                    <option value="suite">Suite</option>
+                                    <option value="villa">Villa</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bus Form -->
+                    <div id="bus-form" class="hidden form-section">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Bus Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="bus-origin" class="block text-sm font-medium text-gray-700">Origin</label>
+                                <input type="text" id="bus-origin" name="origin" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="bus-destination" class="block text-sm font-medium text-gray-700">Destination</label>
+                                <input type="text" id="bus-destination" name="destination" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="bus-departure-date" class="block text-sm font-medium text-gray-700">Departure Date</label>
+                                <input type="date" id="bus-departure-date" name="departure_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="bus-passengers" class="block text-sm font-medium text-gray-700">Number of Passengers</label>
+                                <input type="number" id="bus-passengers" name="passengers" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Train Form -->
+                    <div id="train-form" class="hidden form-section">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Train Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="train-origin" class="block text-sm font-medium text-gray-700">Origin</label>
+                                <input type="text" id="train-origin" name="origin" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="train-destination" class="block text-sm font-medium text-gray-700">Destination</label>
+                                <input type="text" id="train-destination" name="destination" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="train-departure-date" class="block text-sm font-medium text-gray-700">Departure Date</label>
+                                <input type="date" id="train-departure-date" name="departure_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="train-passengers" class="block text-sm font-medium text-gray-700">Number of Passengers</label>
+                                <input type="number" id="train-passengers" name="passengers" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="train-class" class="block text-sm font-medium text-gray-700">Class</label>
+                                <select id="train-class" name="class" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <option value="">Select class</option>
+                                    <option value="sleeper">Sleeper</option>
+                                    <option value="ac-3-tier">AC 3 Tier</option>
+                                    <option value="ac-2-tier">AC 2 Tier</option>
+                                    <option value="ac-1-tier">AC 1 Tier</option>
+                                    <option value="chair-car">Chair Car</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Package Form -->
+                    <div id="package-form" class="hidden form-section">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Package Details</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="package-destination" class="block text-sm font-medium text-gray-700">Destination</label>
+                                <input type="text" id="package-destination" name="destination" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="package-departure-date" class="block text-sm font-medium text-gray-700">Departure Date</label>
+                                <input type="date" id="package-departure-date" name="departure_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="package-return-date" class="block text-sm font-medium text-gray-700">Return Date</label>
+                                <input type="date" id="package-return-date" name="return_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="package-passengers" class="block text-sm font-medium text-gray-700">Number of Passengers</label>
+                                <input type="number" id="package-passengers" name="passengers" min="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Common Fields -->
+                    <div id="common-fields" class="hidden space-y-6">
+                        <div>
+                            <label for="budget" class="block text-sm font-medium text-gray-700">Budget (per person)</label>
+                            <div class="mt-1 relative rounded-md shadow-sm">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 sm:text-sm">₹</span>
+                                </div>
+                                <input type="number" id="budget" name="budget" class="block w-full pl-7 pr-12 rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-700">Additional Details</label>
+                            <div class="mt-1">
+                                <textarea id="description" name="description" rows="4" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Tell agents more about your requirements..."></textarea>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="flexible" class="flex items-center">
+                                <input type="checkbox" id="flexible" name="flexible" class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <span class="ml-2 text-sm text-gray-700">I'm flexible with dates</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div id="submit-section" class="hidden pt-5 border-t border-gray-200">
+                        <div class="flex justify-end">
+                            <button type="button" class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Cancel
+                            </button>
+                            <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Submit Requirement
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const serviceTypes = document.querySelectorAll('.service-type');
+    const formSections = document.querySelectorAll('.form-section');
+    const commonFields = document.getElementById('common-fields');
+    const submitSection = document.getElementById('submit-section');
+    let selectedServiceType = null;
+
+    serviceTypes.forEach(type => {
+        type.addEventListener('click', function() {
+            // Remove previous selection
+            serviceTypes.forEach(t => t.classList.remove('border-blue-500', 'bg-blue-50'));
+            
+            // Add selection to current
+            this.classList.add('border-blue-500', 'bg-blue-50');
+            
+            // Hide all forms
+            formSections.forEach(section => section.classList.add('hidden'));
+            
+            // Show selected form
+            const formId = this.getAttribute('data-type') + '-form';
+            const selectedForm = document.getElementById(formId);
+            if (selectedForm) {
+                selectedForm.classList.remove('hidden');
+            }
+            
+            // Show common fields and submit button
+            commonFields.classList.remove('hidden');
+            submitSection.classList.remove('hidden');
+            
+            selectedServiceType = this.getAttribute('data-type');
+        });
+    });
+
+    // Form submission
+    document.getElementById('requirement-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Collect form data based on selected service type
+        const formData = new FormData();
+        formData.append('service_type', selectedServiceType);
+        
+        // Add common fields
+        formData.append('budget', document.getElementById('budget').value);
+        formData.append('description', document.getElementById('description').value);
+        formData.append('flexible', document.getElementById('flexible').checked);
+        
+        // Add service-specific fields
+        const formId = selectedServiceType + '-form';
+        const formElement = document.getElementById(formId);
+        const inputs = formElement.querySelectorAll('input, select');
+        
+        inputs.forEach(input => {
+            if (input.type !== 'checkbox' || input.checked) {
+                formData.append(input.name, input.value);
+            }
+        });
+        
+        // Here you would typically send the data to your server
+        console.log('Form submitted with data:', Object.fromEntries(formData));
+        
+        // Show success message
+        alert('Your requirement has been submitted successfully! Agents will contact you soon with quotes.');
+        
+        // Reset form
+        this.reset();
+        serviceTypes.forEach(t => t.classList.remove('border-blue-500', 'bg-blue-50'));
+        formSections.forEach(section => section.classList.add('hidden'));
+        commonFields.classList.add('hidden');
+        submitSection.classList.add('hidden');
+        selectedServiceType = null;
+    });
+});
+</script>
+{% endblock %}

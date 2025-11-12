@@ -1,0 +1,209 @@
+{% extends 'base.html' %} {% block title %}Customer Dashboard - Travel
+Marketplace{% endblock %} {% block content %}
+<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">
+      Welcome back, {{ user.get_full_name|default:user.username }}!
+    </h1>
+    <p class="mt-2 text-gray-600">
+      Manage your travel requirements and bookings from here.
+    </p>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+          <i class="fas fa-suitcase text-blue-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Active Bookings</p>
+          <p class="text-2xl font-semibold text-gray-900">
+            {{ active_bookings }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+          <i class="fas fa-check-circle text-green-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Total Bookings</p>
+          <p class="text-2xl font-semibold text-gray-900">
+            {{ total_bookings }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 bg-yellow-100 rounded-lg p-3">
+          <i class="fas fa-clipboard-list text-yellow-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Active Requirements</p>
+          <p class="text-2xl font-semibold text-gray-900">
+            {{ active_requirements }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="flex-shrink-0 bg-red-100 rounded-lg p-3">
+          <i class="fas fa-bell text-red-600 text-xl"></i>
+        </div>
+        <div class="ml-4">
+          <p class="text-sm font-medium text-gray-500">Unread Notifications</p>
+          <p class="text-2xl font-semibold text-gray-900">
+            {{ unread_notifications }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="bg-white rounded-lg shadow mb-8">
+    <div class="px-6 py-4 border-b border-gray-200">
+      <h2 class="text-lg font-semibold text-gray-900">Quick Actions</h2>
+    </div>
+    <div class="p-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <a
+          href="{% url 'requirements:create' %}"
+          class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <div class="flex-shrink-0">
+            <i class="fas fa-plus-circle text-blue-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-sm font-medium text-gray-900">
+              Post New Requirement
+            </h3>
+            <p class="text-sm text-gray-500">Create a new travel requirement</p>
+          </div>
+        </a>
+
+        <a
+          href="{% url 'bookings:list' %}"
+          class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <div class="flex-shrink-0">
+            <i class="fas fa-list text-green-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-sm font-medium text-gray-900">View Bookings</h3>
+            <p class="text-sm text-gray-500">Manage your existing bookings</p>
+          </div>
+        </a>
+
+        <a
+          href="{% url 'pages:agents' %}"
+          class="flex items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <div class="flex-shrink-0">
+            <i class="fas fa-user-tie text-purple-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-sm font-medium text-gray-900">Find Agents</h3>
+            <p class="text-sm text-gray-500">Discover travel agents</p>
+          </div>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Recent Bookings -->
+    <div class="bg-white rounded-lg shadow">
+      <div
+        class="px-6 py-4 border-b border-gray-200 flex justify-between items-center"
+      >
+        <h2 class="text-lg font-semibold text-gray-900">Recent Bookings</h2>
+        <a
+          href="{% url 'bookings:list' %}"
+          class="text-sm text-blue-600 hover:text-blue-500"
+          >View All</a
+        >
+      </div>
+      <div class="p-6">
+        <div class="space-y-4">
+          <!-- Placeholder for recent bookings -->
+          <div class="text-center py-8">
+            <i class="fas fa-suitcase text-gray-300 text-4xl mb-4"></i>
+            <p class="text-gray-500">No recent bookings</p>
+            <a
+              href="{% url 'requirements:create' %}"
+              class="mt-4 inline-flex items-center text-blue-600 hover:text-blue-500"
+            >
+              <i class="fas fa-plus-circle mr-2"></i>
+              Create your first booking
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Requirements -->
+    <div class="bg-white rounded-lg shadow">
+      <div
+        class="px-6 py-4 border-b border-gray-200 flex justify-between items-center"
+      >
+        <h2 class="text-lg font-semibold text-gray-900">Recent Requirements</h2>
+        <a
+          href="{% url 'dashboard:requirements' %}"
+          class="text-sm text-blue-600 hover:text-blue-500"
+          >View All</a
+        >
+      </div>
+      <div class="p-6">
+        <div class="space-y-4">
+          <!-- Placeholder for recent requirements -->
+          <div class="text-center py-8">
+            <i class="fas fa-clipboard-list text-gray-300 text-4xl mb-4"></i>
+            <p class="text-gray-500">No recent requirements</p>
+            <a
+              href="{% url 'requirements:create' %}"
+              class="mt-4 inline-flex items-center text-blue-600 hover:text-blue-500"
+            >
+              <i class="fas fa-plus-circle mr-2"></i>
+              Post your first requirement
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Travel Tips Section -->
+  <div
+    class="mt-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg shadow-lg p-8 text-white"
+  >
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold mb-2">Travel Tips & Inspiration</h2>
+        <p class="text-blue-100">
+          Get personalized travel recommendations and tips from our AI
+          assistant.
+        </p>
+      </div>
+      <a
+        href="{% url 'ai_assistant:chat' %}"
+        class="bg-white text-blue-600 px-6 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+      >
+        <i class="fas fa-robot mr-2"></i>
+        Ask AI Assistant
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% block title %}Booking Confirmation - Travel Marketplace{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Success Header -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="bg-green-50 px-6 py-4 border-b border-green-200">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <h1 class="text-2xl font-bold text-green-800">Booking Confirmed!</h1>
+                        <p class="mt-1 text-sm text-green-600">
+                            Your booking has been successfully confirmed and payment processed.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="px-6 py-6">
+                <!-- Booking Details -->
+                <div class="mb-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Booking Details</h2>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <span class="text-sm font-medium text-gray-500">Booking ID:</span>
+                                <p class="text-lg font-semibold text-gray-900">#{{ booking.id }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-500">Status:</span>
+                                <p class="text-lg font-semibold text-green-600">{{ booking.get_status_display }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-500">Total Amount:</span>
+                                <p class="text-lg font-semibold text-blue-600">${{ booking.total_amount|floatformat:2 }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-500">Payment Date:</span>
+                                <p class="text-lg font-semibold text-gray-900">
+                                    {% for payment in booking.payments.all %}
+                                        {% if payment.status == 'completed' %}
+                                            {{ payment.payment_date|date:"F j, Y" }}
+                                        {% endif %}
+                                    {% endfor %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Trip Details -->
+                <div class="mb-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Trip Details</h2>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <span class="text-sm font-medium text-gray-500">Destination:</span>
+                                <p class="text-lg font-semibold text-gray-900">{{ booking.quote.requirement.destination }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-500">Travel Dates:</span>
+                                <p class="text-lg font-semibold text-gray-900">
+                                    {{ booking.quote.requirement.travel_date_start|date:"M d" }} - 
+                                    {{ booking.quote.requirement.travel_date_end|date:"M d, Y" }}
+                                </p>
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-500">Service Type:</span>
+                                <p class="text-lg font-semibold text-gray-900">{{ booking.quote.requirement.service_type.name }}</p>
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-500">Number of Travelers:</span>
+                                <p class="text-lg font-semibold text-gray-900">
+                                    {{ booking.quote.requirement.number_of_adults }} Adults
+                                    {% if booking.quote.requirement.number_of_children > 0 %}
+                                    , {{ booking.quote.requirement.number_of_children }} Children
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Agent Information -->
+                <div class="mb-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">Agent Information</h2>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <img src="https://picsum.photos/seed/{{ booking.quote.agent.company_name }}/60/60.jpg" 
+                                 alt="{{ booking.quote.agent.company_name }}" 
+                                 class="w-16 h-16 rounded-full mr-4">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">{{ booking.quote.agent.company_name }}</h3>
+                                <p class="text-sm text-gray-600">{{ booking.quote.agent.user.email }}</p>
+                                <p class="text-sm text-gray-600">{{ booking.quote.agent.phone|default:"No phone provided" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Actions -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button onclick="window.print()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                        <svg class="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2h6z" />
+                        </svg>
+                        Print Confirmation
+                    </button>
+                    <a href="{% url 'dashboard:booking_detail' booking.id %}" 
+                       class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium text-center transition-colors">
+                        View Full Details
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Next Steps -->
+        <div class="mt-8 bg-white rounded-lg shadow p-6">
+            <h2 class="text-lg font-semibold text-gray-900 mb-4">What's Next?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="text-center">
+                    <div class="mx-auto w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="font-medium text-gray-900 mb-2">Receive Voucher</h3>
+                    <p class="text-sm text-gray-600">
+                        Your travel voucher will be sent to your email within 24 hours.
+                    </p>
+                </div>
+                <div class="text-center">
+                    <div class="mx-auto w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                    </div>
+                    <h3 class="font-medium text-gray-900 mb-2">Contact Agent</h3>
+                    <p class="text-sm text-gray-600">
+                        You can contact your agent directly for any special requests.
+                    </p>
+                </div>
+                <div class="text-center">
+                    <div class="mx-auto w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 01-.69.925l-2.868 1.084a2.753 2.753 0 00-1.892.734l-.255.13a1 1 0 01-.697-.653l-2.787-1.084a1 1 0 00-.718.09l.014.005a1 1 0 01-.674-.532L2.5 12.329a1 1 0 01.13-.8l1.938-3.5a1 1 0 01.656-.68l3.424-1.286a1 1 0 00.718-.09l1.938 3.5a1 1 0 01-.13.8l-1.938 3.5a1 1 0 01-.656.68l-3.424 1.286a1 1 0 00-.718.09l-1.938-3.5a1 1 0 01.13-.8l1.938-3.5z" />
+                        </svg>
+                    </div>
+                    <h3 class="font-medium text-gray-900 mb-2">Write Review</h3>
+                    <p class="text-sm text-gray-600">
+                        Share your experience after your trip to help other travelers.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

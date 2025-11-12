@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Travel Marketplace{% endblock %}</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+
+    <!-- Custom CSS -->
+    <style>
+      /* Custom animations and styles */
+      .fade-in {
+        animation: fadeIn 0.3s ease-in;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .hover-scale {
+        transition: transform 0.2s ease;
+      }
+
+      .hover-scale:hover {
+        transform: scale(1.05);
+      }
+
+      /* Custom scrollbar */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+      }
+
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body class="bg-gray-50 font-sans antialiased">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+          <!-- Logo -->
+          <div class="flex items-center">
+            <a
+              href="{% url 'pages:home' %}"
+              class="flex items-center space-x-2"
+            >
+              <i class="fas fa-globe-americas text-blue-600 text-2xl"></i>
+              <span class="text-xl font-bold text-gray-900"
+                >TravelMarketplace</span
+              >
+            </a>
+          </div>
+
+          <!-- Main Navigation -->
+          <div class="hidden md:flex items-center space-x-8">
+            <a
+              href="{% url 'pages:home' %}"
+              class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Home
+            </a>
+            <a
+              href="{% url 'pages:destinations' %}"
+              class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Destinations
+            </a>
+            <a
+              href="{% url 'requirements:create' %}"
+              class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              <i class="fas fa-plus-circle mr-1"></i>
+              Post Requirement
+            </a>
+            <a
+              href="{% url 'pages:agents' %}"
+              class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Find Agents
+            </a>
+          </div>
+
+          <!-- Right Side Actions -->
+          <div class="flex items-center space-x-4">
+            {% if user.is_authenticated %}
+            <!-- Notifications -->
+            <div class="relative">
+              <button
+                class="text-gray-500 hover:text-gray-700 focus:outline-none focus:text-blue-600 transition-colors"
+                id="notification-button"
+              >
+                <i class="fas fa-bell text-lg"></i>
+                <span
+                  id="notification-badge"
+                  class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden"
+                >
+                  0
+                </span>
+              </button>
+              
+              <!-- Notification Dropdown -->
+              <div
+                class="hidden absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+                id="notification-dropdown"
+              >
+                <div class="py-2">
+                  <div class="px-4 py-2 border-b border-gray-100">
+                    <div class="flex items-center justify-between">
+                      <h3 class="text-sm font-medium text-gray-900">Notifications</h3>
+                      <a href="{% url 'notifications:list' %}" class="text-xs text-blue-600 hover:text-blue-800">
+                        View all
+                      </a>
+                    </div>
+                  </div>
+                  <div id="notification-list" class="max-h-96 overflow-y-auto">
+                    <!-- Notifications will be loaded here -->
+                    <div class="px-4 py-8 text-center text-gray-500">
+                      <i class="fas fa-bell text-2xl mb-2"></i>
+                      <p class="text-sm">No new notifications</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="relative">
+              <a
+                href="{% url 'chat:index' %}"
+                class="text-gray-500 hover:text-gray-700 focus:outline-none focus:text-blue-600 transition-colors"
+                id="messages-link"
+              >
+                <i class="fas fa-envelope text-lg"></i>
+                <span
+                  id="messages-badge"
+                  class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden"
+                >
+                  0
+                </span>
+              </a>
+            </div>
+
+            <!-- User Menu -->
+            <div class="relative">
+              <button
+                class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                id="user-menu-button"
+              >
+                {% if user.profile.profile_picture %}
+                <img
+                  class="h-8 w-8 rounded-full object-cover"
+                  src="{{ user.profile.profile_picture.url }}"
+                  alt="{{ user.get_full_name }}"
+                />
+                {% else %}
+                <div
+                  class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium"
+                >
+                  {{ user.get_initials }}
+                </div>
+                {% endif %}
+              </button>
+
+              <!-- Dropdown Menu -->
+              <div
+                class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+                id="user-menu"
+              >
+                <div class="py-1">
+                  {% if user.user_type == 'customer' %}
+                  <a
+                    href="{% url 'users:dashboard' %}"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                  </a>
+                  {% elif user.user_type == 'agent' %}
+                  <a
+                    href="{% url 'agents:dashboard' %}"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <i class="fas fa-tachometer-alt mr-2"></i>Agent Dashboard
+                  </a>
+                  {% endif %}
+                  <a
+                    href="{% url 'users:profile' %}"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <i class="fas fa-user mr-2"></i>Profile
+                  </a>
+                  <a
+                    href="{% url 'users:settings' %}"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <i class="fas fa-cog mr-2"></i>Settings
+                  </a>
+                  <div class="border-t border-gray-100"></div>
+                  <form method="post" action="{% url 'users:logout' %}">
+                    {% csrf_token %}
+                    <button
+                      type="submit"
+                      class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+            {% else %}
+            <!-- Login/Register -->
+            <a
+              href="{% url 'users:login' %}"
+              class="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Login
+            </a>
+            <a
+              href="{% url 'users:register' %}"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Register
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Mobile Menu Button -->
+    <div class="md:hidden fixed bottom-4 right-4 z-50">
+      <button
+        class="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg"
+        id="mobile-menu-button"
+      >
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="min-h-screen">
+      {% block content %}
+      <!-- Content will be inserted here -->
+      {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white mt-16">
+      <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <!-- Company Info -->
+          <div>
+            <h3 class="text-lg font-semibold mb-4">TravelMarketplace</h3>
+            <p class="text-gray-300 mb-4">
+              Connect with trusted travel agents and discover amazing
+              destinations worldwide.
+            </p>
+            <div class="flex space-x-4">
+              <a
+                href="#"
+                class="text-gray-300 hover:text-white transition-colors"
+              >
+                <i class="fab fa-facebook text-xl"></i>
+              </a>
+              <a
+                href="#"
+                class="text-gray-300 hover:text-white transition-colors"
+              >
+                <i class="fab fa-twitter text-xl"></i>
+              </a>
+              <a
+                href="#"
+                class="text-gray-300 hover:text-white transition-colors"
+              >
+                <i class="fab fa-instagram text-xl"></i>
+              </a>
+              <a
+                href="#"
+                class="text-gray-300 hover:text-white transition-colors"
+              >
+                <i class="fab fa-linkedin text-xl"></i>
+              </a>
+            </div>
+          </div>
+
+          <!-- Quick Links -->
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+            <ul class="space-y-2">
+              <li>
+                <a
+                  href="{% url 'pages:about' %}"
+                  class="text-gray-300 hover:text-white transition-colors"
+                  >About Us</a
+                >
+              </li>
+              <li>
+                <a
+                  href="{% url 'pages:how-it-works' %}"
+                  class="text-gray-300 hover:text-white transition-colors"
+                  >How It Works</a
+                >
+              </li>
+              <li>
+                <a
+                  href="{% url 'pages:faq' %}"
+                  class="text-gray-300 hover:text-white transition-colors"
+                  >FAQ</a
+                >
+              </li>
+              <li>
+                <a
+                  href="{% url 'pages:contact' %}"
+                  class="text-gray-300 hover:text-white transition-colors"
+                  >Contact</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- Services -->
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Services</h3>
+            <ul class="space-y-2">
+              <li>
+                <a
+                  href="{% url 'requirements:create' %}"
+                  class="text-gray-300 hover:text-white transition-colors"
+                  >Post Requirements</a
+                >
+              </li>
+              <li>
+                <a
+                  href="{% url 'pages:agents' %}"
+                  class="text-gray-300 hover:text-white transition-colors"
+                  >Find Agents</a
+                >
+              </li>
+              <li>
+                <a
+                  href="{% url 'ai_assistant:chat' %}"
+                  class="text-gray-300 hover:text-white transition-colors"
+                  >AI Assistant</a
+                >
+              </li>
+              <li>
+                <a
+                  href="{% url 'pages:blog' %}"
+                  class="text-gray-300 hover:text-white transition-colors"
+                  >Travel Blog</a
+                >
+              </li>
+            </ul>
+          </div>
+
+          <!-- Newsletter -->
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Stay Updated</h3>
+            <p class="text-gray-300 mb-4">
+              Get the latest travel deals and tips delivered to your inbox.
+            </p>
+            <form class="flex">
+              <input
+                type="email"
+                placeholder="Your email"
+                class="flex-1 px-4 py-2 rounded-l-md text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                type="submit"
+                class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-r-md text-white transition-colors"
+              >
+                Subscribe
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Bottom Bar -->
+        <div class="border-t border-gray-700 mt-8 pt-8">
+          <div class="flex flex-col md:flex-row justify-between items-center">
+            <p class="text-gray-300">
+              &copy; 2024 TravelMarketplace. All rights reserved.
+            </p>
+            <div class="flex space-x-6 mt-4 md:mt-0">
+              <a
+                href="{% url 'pages:privacy' %}"
+                class="text-gray-300 hover:text-white transition-colors"
+                >Privacy Policy</a
+              >
+              <a
+                href="{% url 'pages:terms' %}"
+                class="text-gray-300 hover:text-white transition-colors"
+                >Terms of Service</a
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+    <!-- JavaScript -->
+    <script>
+      // User menu toggle
+      document
+        .getElementById("user-menu-button")
+        ?.addEventListener("click", function () {
+          const menu = document.getElementById("user-menu");
+          menu.classList.toggle("hidden");
+        });
+
+      // Close dropdown when clicking outside
+      document.addEventListener("click", function (event) {
+        const userMenu = document.getElementById("user-menu");
+        const userMenuButton = document.getElementById("user-menu-button");
+
+        if (
+          userMenu &&
+          !userMenu.contains(event.target) &&
+          !userMenuButton.contains(event.target)
+        ) {
+          userMenu.classList.add("hidden");
+        }
+      });
+
+      // Mobile menu (placeholder functionality)
+      document
+        .getElementById("mobile-menu-button")
+        ?.addEventListener("click", function () {
+          // Add mobile menu functionality here
+          alert("Mobile menu coming soon!");
+        });
+
+      // HTMX configuration
+      htmx.config.globalViewTransitions = true;
+      htmx.config.globalEvaluations = true;
+
+      // Notification dropdown functionality
+      const notificationButton = document.getElementById('notification-button');
+      const notificationDropdown = document.getElementById('notification-dropdown');
+      const notificationList = document.getElementById('notification-list');
+      const notificationBadge = document.getElementById('notification-badge');
+      const messagesBadge = document.getElementById('messages-badge');
+
+      if (notificationButton) {
+        notificationButton.addEventListener('click', function(e) {
+          e.stopPropagation();
+          notificationDropdown.classList.toggle('hidden');
+          
+          // Load notifications when opening
+          if (!notificationDropdown.classList.contains('hidden')) {
+            loadNotifications();
+          }
+        });
+      }
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function(event) {
+        if (notificationDropdown && !notificationDropdown.contains(event.target) && !notificationButton.contains(event.target)) {
+          notificationDropdown.classList.add('hidden');
+        }
+      });
+
+      // Load notifications function
+      function loadNotifications() {
+        fetch('/notifications/api/get-unread-count/')
+          .then(response => response.json())
+          .then(data => {
+            updateNotificationBadge(data.unread_count);
+            
+            if (data.unread_count > 0) {
+              // Load recent notifications
+              fetch('/notifications/list/')
+                .then(response => response.text())
+                .then(html => {
+                  // This would need to be implemented as an API endpoint
+                  // For now, just show a message
+                  notificationList.innerHTML = `
+                    <div class="px-4 py-2">
+                      <p class="text-sm text-gray-500">You have ${data.unread_count} unread notifications</p>
+                      <a href="/notifications/" class="text-xs text-blue-600 hover:text-blue-800 mt-2 block">
+                        View all notifications
+                      </a>
+                    </div>
+                  `;
+                });
+            } else {
+              notificationList.innerHTML = `
+                <div class="px-4 py-8 text-center text-gray-500">
+                  <i class="fas fa-bell text-2xl mb-2"></i>
+                  <p class="text-sm">No new notifications</p>
+                </div>
+              `;
+            }
+          })
+          .catch(error => {
+            console.error('Error loading notifications:', error);
+          });
+      }
+
+      // Update notification badge
+      function updateNotificationBadge(count) {
+        if (count > 0) {
+          notificationBadge.textContent = count;
+          notificationBadge.classList.remove('hidden');
+        } else {
+          notificationBadge.classList.add('hidden');
+        }
+      }
+
+      // Update messages badge (placeholder for now)
+      function updateMessagesBadge(count) {
+        if (count > 0) {
+          messagesBadge.textContent = count;
+          messagesBadge.classList.remove('hidden');
+        } else {
+          messagesBadge.classList.add('hidden');
+        }
+      }
+
+      // Poll for notifications every 30 seconds
+      setInterval(function() {
+        if (notificationDropdown && notificationDropdown.classList.contains('hidden')) {
+          loadNotifications();
+        }
+      }, 30000);
+
+      // Initial load
+      if (notificationBadge) {
+        loadNotifications();
+      }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

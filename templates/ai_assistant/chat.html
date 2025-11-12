@@ -1,0 +1,334 @@
+{% extends 'base.html' %} {% block title %}AI Travel Assistant - {% endblock %}
+{% block content %}
+<section class="py-16 bg-gradient-to-br from-purple-600 to-blue-600 text-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center">
+      <h1 class="text-4xl md:text-5xl font-bold mb-6">AI Travel Assistant</h1>
+      <p class="text-xl text-purple-100 mb-8 max-w-3xl mx-auto">
+        Get personalized travel recommendations and instant itineraries powered
+        by artificial intelligence
+      </p>
+
+      <!-- AI Avatar/Icon -->
+      <div class="flex justify-center mb-8">
+        <div
+          class="w-24 h-24 bg-white bg-opacity-20 rounded-full flex items-center justify-center"
+        >
+          <i class="fas fa-robot text-4xl text-white"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Chat Interface -->
+<section class="py-16 bg-gray-50">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="bg-white rounded-lg shadow-lg">
+      <!-- Chat Header -->
+      <div class="border-b border-gray-200 p-6">
+        <div class="flex items-center space-x-3">
+          <div
+            class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center"
+          >
+            <i class="fas fa-robot text-white"></i>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900">
+              AI Travel Assistant
+            </h2>
+            <p class="text-sm text-gray-600">
+              Powered by advanced AI technology
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat Messages Area -->
+      <div id="chat-messages" class="h-96 overflow-y-auto p-6 space-y-4">
+        <!-- Welcome Message -->
+        <div class="flex items-start space-x-3">
+          <div
+            class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0"
+          >
+            <i class="fas fa-robot text-white text-sm"></i>
+          </div>
+          <div class="bg-gray-100 rounded-lg p-4 max-w-md">
+            <p class="text-gray-800">
+              👋 Hello! I'm your AI travel assistant. I can help you plan trips,
+              find destinations, create itineraries, and answer any
+              travel-related questions. What would you like to know today?
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Area -->
+      <div class="border-t border-gray-200 p-6">
+        <form id="chat-form" class="flex space-y-4">
+          <div class="flex space-x-4">
+            <input
+              type="text"
+              id="message-input"
+              placeholder="Type your message here..."
+              class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              rows="1"
+            />
+            <button
+              type="submit"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            >
+              <i class="fas fa-paper-plane mr-2"></i>
+              Send
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-16 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        What Can I Help You With?
+      </h2>
+      <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+        From destination recommendations to complete itinerary planning
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <!-- Feature 1 -->
+      <div class="text-center">
+        <div
+          class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <i class="fas fa-map-marked-alt text-blue-600 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">
+          Destination Discovery
+        </h3>
+        <p class="text-gray-600">
+          Find perfect destinations based on your preferences, budget, and
+          travel style
+        </p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="text-center">
+        <div
+          class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <i class="fas fa-calendar-alt text-green-600 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">
+          Itinerary Planning
+        </h3>
+        <p class="text-gray-600">
+          Get day-by-day travel plans with recommendations for activities,
+          dining, and accommodations
+        </p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="text-center">
+        <div
+          class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <i class="fas fa-money-bill-wave text-purple-600 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">
+          Budget Planning
+        </h3>
+        <p class="text-gray-600">
+          Optimize your travel budget with cost estimates and money-saving tips
+        </p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="text-center">
+        <div
+          class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4"
+        >
+          <i class="fas fa-lightbulb text-yellow-600 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">Travel Tips</h3>
+        <p class="text-gray-600">
+          Get insider tips, local insights, and hidden gems for your destination
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Tips Section -->
+<section class="py-16 bg-gray-50">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="bg-blue-600 rounded-lg p-8 text-white text-center">
+      <h3 class="text-2xl font-bold mb-4">
+        💡 Pro Tips for Better AI Assistance
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div class="text-left">
+          <h4 class="font-semibold mb-2">Be Specific</h4>
+          <p class="text-blue-100">
+            Include details like destination type, travel dates, budget range,
+            and group size
+          </p>
+        </div>
+        <div class="text-left">
+          <h4 class="font-semibold mb-2">Ask Follow-up Questions</h4>
+          <p class="text-blue-100">
+            Request recommendations for activities, dining, accommodations, and
+            transportation
+          </p>
+        </div>
+        <div class="text-left">
+          <h4 class="font-semibold mb-2">Mention Preferences</h4>
+          <p class="text-blue-100">
+            Let me know your travel style, interests, and any special
+            requirements
+          </p>
+        </div>
+        <div class="text-left">
+          <h4 class="font-semibold mb-2">Request Alternatives</h4>
+          <p class="text-blue-100">
+            Ask for multiple options to compare prices and experiences
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %} {% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const chatForm = document.getElementById("chat-form");
+    const messageInput = document.getElementById("message-input");
+    const chatMessages = document.getElementById("chat-messages");
+
+    if (chatForm && messageInput && chatMessages) {
+      chatForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const message = messageInput.value.trim();
+        if (!message) return;
+
+        // Add user message to chat
+        addMessage(message, "user");
+
+        // Clear input
+        messageInput.value = "";
+
+        // Show typing indicator
+        addTypingIndicator();
+
+        // Send to AI
+        fetch("/ai/ask/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: JSON.stringify({
+            message: message,
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            removeTypingIndicator();
+            if (data.response) {
+              addMessage(data.response, "ai");
+            } else if (data.error) {
+              addMessage(
+                "Sorry, I encountered an error. Please try again.",
+                "error"
+              );
+            }
+          })
+          .catch((error) => {
+            removeTypingIndicator();
+            addMessage(
+              "Sorry, I encountered an error. Please try again.",
+              "error"
+            );
+          });
+      });
+
+      function addMessage(content, sender) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = "flex items-start space-x-3 mb-4";
+
+        const avatarDiv = document.createElement("div");
+        avatarDiv.className =
+          "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0";
+
+        if (sender === "user") {
+          avatarDiv.className += " bg-gray-600";
+          avatarDiv.innerHTML =
+            '<i class="fas fa-user text-white text-sm"></i>';
+        } else if (sender === "ai") {
+          avatarDiv.className += " bg-blue-600";
+          avatarDiv.innerHTML =
+            '<i class="fas fa-robot text-white text-sm"></i>';
+        } else if (sender === "error") {
+          avatarDiv.className += " bg-red-600";
+          avatarDiv.innerHTML =
+            '<i class="fas fa-exclamation-triangle text-white text-sm"></i>';
+        }
+
+        const contentDiv = document.createElement("div");
+        contentDiv.className = "bg-gray-100 rounded-lg p-4 max-w-md";
+        contentDiv.innerHTML = `<p class="text-gray-800">${content}</p>`;
+
+        messageDiv.appendChild(avatarDiv);
+        messageDiv.appendChild(contentDiv);
+        chatMessages.appendChild(messageDiv);
+
+        // Scroll to bottom
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function addTypingIndicator() {
+        const typingDiv = document.createElement("div");
+        typingDiv.className =
+          "flex items-center space-x-2 mb-4 typing-indicator";
+        typingDiv.id = "typing-indicator";
+        typingDiv.innerHTML = `
+                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                    <i class="fas fa-robot text-white text-sm"></i>
+                </div>
+                <div class="bg-gray-100 rounded-lg p-4">
+                    <p class="text-gray-600 italic">AI is thinking...</p>
+                </div>
+            `;
+        chatMessages.appendChild(typingDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+
+      function removeTypingIndicator() {
+        const typingIndicator = document.getElementById("typing-indicator");
+        if (typingIndicator) {
+          typingIndicator.remove();
+        }
+      }
+
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+        return null;
+      }
+
+      // Auto-resize textarea
+      messageInput.addEventListener("input", function () {
+        this.style.height = "auto";
+        this.style.height = Math.min(this.scrollHeight, 120) + "px";
+      });
+    }
+  });
+</script>
+{% endblock %}

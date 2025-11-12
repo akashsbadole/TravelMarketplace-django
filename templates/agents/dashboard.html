@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% block title %}Agent Dashboard - Travel Marketplace{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">Agent Dashboard</h1>
+                <p class="mt-2 text-gray-600">
+                    Welcome back, {{ agent.company_name }}! Here's your business overview.
+                </p>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="{% url 'agents:profile' %}" 
+                   class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    Edit Profile
+                </a>
+                <a href="{% url 'agents:earnings' %}" 
+                   class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    View Earnings
+                </a>
+            </div>
+        </div>
+        
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Active Quotes -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-yellow-100 rounded-lg p-3">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Active Quotes</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ stats.active_quotes }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pending Bookings -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Pending Bookings</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ stats.pending_bookings }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Total Revenue -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3s3 1.343 3 3 1.343 0 3-3h6.586c1.656 0 3-1.343 3-3 1.343 0 3-3h-6.586C7.343 6 6 3.657 6 8v8c0 1.657 3.343 3-3-1.343 0-3 3z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Revenue</p>
+                        <p class="text-2xl font-semibold text-gray-900">${{ stats.total_revenue|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pending Payout -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-purple-100 rounded-lg p-3">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2m2 4h6a2 2 0 002 2v-1a2 2 0 00-2-2H7a2 2 0 00-2 2v1a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Pending Payout</p>
+                        <p class="text-2xl font-semibold text-gray-900">${{ stats.pending_payout|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Requirements -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Recent Requirements -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Recent Requirements</h2>
+                </div>
+                <div class="p-6">
+                    {% if recent_requirements %}
+                    <div class="space-y-4">
+                        {% for req in recent_requirements %}
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div class="flex-1">
+                                <div class="flex items-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                        {% if req.status == 'open' %}bg-green-100 text-green-800
+                                        {% elif req.status == 'quoted' %}bg-blue-100 text-blue-800
+                                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ req.get_status_display }}
+                                    </span>
+                                    <h3 class="ml-3 text-lg font-medium text-gray-900">{{ req.title }}</h3>
+                                </div>
+                                <div class="mt-1 text-sm text-gray-600">
+                                    {{ req.destination }} • {{ req.travel_date_start|date:"M d" }} - {{ req.travel_date_end|date:"M d, Y" }}
+                                </div>
+                                {% if req.budget_max %}
+                                <div class="mt-1 text-sm font-medium text-gray-900">
+                                    Budget: Up to ${{ req.budget_max|floatformat:0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="ml-4 flex items-center space-x-2">
+                                <a href="{% url 'agents:create_quote' req.id %}" 
+                                   class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm font-medium transition-colors">
+                                    Quote
+                                </a>
+                                <a href="#" 
+                                   class="text-gray-400 hover:text-gray-600 text-sm font-medium">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-8">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002 2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No new requirements</h3>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Check back later for new travel requirements from customers.
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Recent Quotes -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-lg font-semibold text-gray-900">Recent Quotes</h2>
+                </div>
+                <div class="p-6">
+                    {% if recent_quotes %}
+                    <div class="space-y-4">
+                        {% for quote in recent_quotes %}
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                            <div class="flex-1">
+                                <div class="flex items-center">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                        {% if quote.status == 'accepted' %}bg-green-100 text-green-800
+                                        {% elif quote.status == 'rejected' %}bg-red-100 text-red-800
+                                        {% else %}bg-blue-100 text-blue-800{% endif %}">
+                                        {{ quote.get_status_display }}
+                                    </span>
+                                    <h3 class="ml-3 text-lg font-medium text-gray-900">
+                                        Quote for {{ quote.requirement.title }}
+                                    </h3>
+                                </div>
+                                <div class="mt-1 text-sm text-gray-600">
+                                    Customer: {{ quote.requirement.user.get_full_name|default:quote.requirement.user.email }}
+                                </div>
+                                <div class="mt-1 text-lg font-semibold text-blue-600">
+                                    ${{ quote.total_amount|floatformat:2 }}
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <a href="#" 
+                                   class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-8">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No recent quotes</h3>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Start quoting on requirements to see them here.
+                        </p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900">Quick Actions</h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <a href="{% url 'agents:requirements' %}" 
+                       class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002 2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" />
+                        </svg>
+                        Browse Requirements
+                    </a>
+                    <a href="{% url 'agents:quotes' %}" 
+                       class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002 2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" />
+                        </svg>
+                        Manage Quotes
+                    </a>
+                    <a href="{% url 'agents:bookings' %}" 
+                       class="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        View Bookings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard - Travel Marketplace{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <!-- Admin Header -->
+    <div class="bg-white shadow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-4">
+                    <h1 class="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                        Admin
+                    </span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{% url 'admin_panel:system_settings' %}" 
+                       class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-cog text-lg"></i>
+                    </a>
+                    <a href="{% url 'users:logout' %}" 
+                       class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-sign-out-alt text-lg"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- System Alerts -->
+        {% if system_alerts %}
+        <div class="mb-8">
+            <div class="rounded-md bg-red-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-triangle text-red-400"></i>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">
+                            System Alerts
+                        </h3>
+                        <div class="mt-2 text-sm text-red-700">
+                            {% for alert in system_alerts %}
+                            <div class="mb-2">
+                                <strong>{{ alert.title }}</strong>: {{ alert.message }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Users -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                        <i class="fas fa-users text-blue-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Users</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ stats.total_users }}</p>
+                        <p class="text-sm text-green-600">+{{ stats.new_users }} new</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Agents -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                        <i class="fas fa-user-tie text-green-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Agents</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ stats.total_agents }}</p>
+                        <p class="text-sm text-green-600">+{{ stats.new_agents }} new</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Bookings -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-purple-100 rounded-lg p-3">
+                        <i class="fas fa-calendar-check text-purple-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Bookings</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ stats.total_bookings }}</p>
+                        <p class="text-sm text-green-600">+{{ stats.new_bookings }} new</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Revenue -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-yellow-100 rounded-lg p-3">
+                        <i class="fas fa-dollar-sign text-yellow-600"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Revenue</p>
+                        <p class="text-2xl font-semibold text-gray-900">${{ stats.total_revenue|floatformat:0 }}</p>
+                        <p class="text-sm text-gray-500">${{ stats.commission_revenue|floatformat:0 }} commission</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Stats -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- User Stats -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">User Statistics</h3>
+                </div>
+                <div class="p-6">
+                    <dl class="grid grid-cols-2 gap-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Total Customers</dt>
+                            <dd class="mt-1 text-2xl font-semibold text-gray-900">{{ stats.total_users }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">New Customers (30d)</dt>
+                            <dd class="mt-1 text-2xl font-semibold text-green-600">{{ stats.new_users }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Total Agents</dt>
+                            <dd class="mt-1 text-2xl font-semibold text-gray-900">{{ stats.total_agents }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Verified Agents</dt>
+                            <dd class="mt-1 text-2xl font-semibold text-green-600">{{ stats.verified_agents }}</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Booking Stats -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Booking Statistics</h3>
+                </div>
+                <div class="p-6">
+                    <dl class="grid grid-cols-2 gap-4">
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Total Bookings</dt>
+                            <dd class="mt-1 text-2xl font-semibold text-gray-900">{{ stats.total_bookings }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">New Bookings (30d)</dt>
+                            <dd class="mt-1 text-2xl font-semibold text-green-600">{{ stats.new_bookings }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Completed Bookings</dt>
+                            <dd class="mt-1 text-2xl font-semibold text-gray-900">{{ stats.completed_bookings }}</dd>
+                        </div>
+                        <div>
+                            <dt class="text-sm font-medium text-gray-500">Completion Rate</dt>
+                            <dd class="mt-1 text-2xl font-semibold text-blue-600">
+                                {% if stats.total_bookings > 0 %}
+                                {{ stats.completed_bookings|mul:100|div:stats.total_bookings|floatformat:1 }}%
+                                {% else %}
+                                0%
+                                {% endif %}
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Financial Overview -->
+        <div class="bg-white rounded-lg shadow mb-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Financial Overview</h3>
+            </div>
+            <div class="p-6">
+                <dl class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Total Revenue</dt>
+                        <dd class="mt-1 text-3xl font-semibold text-gray-900">${{ stats.total_revenue|floatformat:2 }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Platform Commission</dt>
+                        <dd class="mt-1 text-3xl font-semibold text-green-600">${{ stats.commission_revenue|floatformat:2 }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Requirements & Quotes</dt>
+                        <dd class="mt-1">
+                            <div class="flex space-x-4">
+                                <div>
+                                    <span class="text-sm text-gray-500">Requirements:</span>
+                                    <span class="text-lg font-semibold text-gray-900">{{ stats.total_requirements }}</span>
+                                    <span class="text-sm text-green-600">(+{{ stats.new_requirements }})</span>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-gray-500">Quotes:</span>
+                                    <span class="text-lg font-semibold text-gray-900">{{ stats.total_quotes }}</span>
+                                </div>
+                            </div>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Recent Activities -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Recent Activities</h3>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-4">
+                        {% for activity in recent_activities %}
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0">
+                                {% if activity.action == 'create' %}
+                                <i class="fas fa-plus text-green-500"></i>
+                                {% elif activity.action == 'update' %}
+                                <i class="fas fa-edit text-blue-500"></i>
+                                {% elif activity.action == 'delete' %}
+                                <i class="fas fa-trash text-red-500"></i>
+                                {% elif activity.action == 'approve' %}
+                                <i class="fas fa-check text-green-500"></i>
+                                {% elif activity.action == 'reject' %}
+                                <i class="fas fa-times text-red-500"></i>
+                                {% else %}
+                                <i class="fas fa-info text-gray-500"></i>
+                                {% endif %}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm text-gray-900">
+                                    <span class="font-medium">{{ activity.admin_user.get_full_name|default:activity.admin_user.username }}</span>
+                                    {{ activity.get_action_display }} {{ activity.object_type|title }}
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    {{ activity.description|default:activity.object_repr }}
+                                </p>
+                                <p class="text-xs text-gray-400">
+                                    {{ activity.created_at|timesince }} ago
+                                </p>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center text-gray-500 py-4">
+                            <i class="fas fa-history text-2xl mb-2"></i>
+                            <p class="text-sm">No recent activities</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="bg-white rounded-lg shadow">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900">Quick Actions</h3>
+                </div>
+                <div class="p-6">
+                    <div class="grid grid-cols-1 gap-4">
+                        <a href="{% url 'admin_panel:manage_agents' %}" 
+                           class="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-user-check text-green-600 mr-3"></i>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Manage Agents</p>
+                                <p class="text-xs text-gray-500">Verify and manage agent applications</p>
+                            </div>
+                        </a>
+                        
+                        <a href="{% url 'admin_panel:commission_management' %}" 
+                           class="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-percentage text-blue-600 mr-3"></i>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Commission Management</p>
+                                <p class="text-xs text-gray-500">Manage commission rates and payouts</p>
+                            </div>
+                        </a>
+                        
+                        <a href="{% url 'admin_panel:payout_management' %}" 
+                           class="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-money-bill-wave text-yellow-600 mr-3"></i>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">Payout Management</p>
+                                <p class="text-xs text-gray-500">Process agent payout requests</p>
+                            </div>
+                        </a>
+                        
+                        <a href="{% url 'admin_panel:analytics' %}" 
+                           class="flex items-center p-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-chart-line text-purple-600 mr-3"></i>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">View Analytics</p>
+                                <p class="text-xs text-gray-500">Detailed platform analytics</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

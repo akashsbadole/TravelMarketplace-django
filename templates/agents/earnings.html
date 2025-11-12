@@ -1,0 +1,254 @@
+{% extends 'base.html' %}
+{% block title %}Earnings & Payouts - Agent Dashboard{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Earnings & Payouts</h1>
+            <p class="mt-2 text-gray-600">
+                Track your earnings and manage your payouts
+            </p>
+        </div>
+        
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Earnings -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-green-100 rounded-lg p-3">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3s3 1.343 3 3 1.343 0 3-3h6.586c1.656 0 3-1.343 3-3 1.343 0 3-3h-6.586C7.343 6 6 3.657 6 8v8c0 1.657 3.343 3-3 1.343 0 3-3z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Earnings</p>
+                        <p class="text-2xl font-semibold text-gray-900">${{ stats.total_earnings|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pending Payout -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-yellow-100 rounded-lg p-3">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2m2 4h6a2 2 0 002 2v-1a2 2 0 00-2-2H7a2 2 0 00-2 2v1a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Pending Payout</p>
+                        <p class="text-2xl font-semibold text-gray-900">${{ stats.pending_payout|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Paid Out -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-blue-100 rounded-lg p-3">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Paid Out</p>
+                        <p class="text-2xl font-semibold text-gray-900">${{ stats.paid_out|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Commission Rate -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-purple-100 rounded-lg p-3">
+                        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 1.343-3 3s3 1.343 3 3 1.343 0 3-3h6.586c1.656 0 3-1.343 3-3 1.343 0 3-3h-6.586C7.343 6 6 3.657 6 8v8c0 1.657 3.343 3-3 1.343 0 3-3z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Commission Rate</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ stats.commission_rate }}%</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Booking Count -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 bg-indigo-100 rounded-lg p-3">
+                        <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600">Total Bookings</p>
+                        <p class="text-2xl font-semibold text-gray-900">{{ stats.booking_count }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payout Request Section -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Request Payout</h2>
+                <p class="text-sm text-gray-600">
+                    Request payout when your pending amount reaches the minimum threshold.
+                </p>
+            </div>
+            
+            <div class="p-6">
+                {% if stats.pending_payout >= agent.minimum_payout_threshold %}
+                <form method="post" action="{% url 'agents:request_payout' %}">
+                    {% csrf_token %}
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Payout Amount</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-gray-500 sm:text-sm">$</span>
+                            </div>
+                            <input type="number" name="amount" readonly
+                                   class="block w-full pl-8 pr-3 py-2 border-gray-300 rounded-md bg-gray-50 text-gray-900"
+                                   value="{{ stats.pending_payout|floatformat:2 }}">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bank Account Details</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
+                                <input type="text" name="bank_name" value="{{ agent.bank_name|default:'' }}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Account Number</label>
+                                <input type="text" name="bank_account_number" value="{{ agent.bank_account_number|default:'' }}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Account Holder Name</label>
+                                <input type="text" name="bank_account_holder_name" value="{{ agent.bank_account_holder_name|default:'' }}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">IFSC Code</label>
+                                <input type="text" name="bank_ifsc_code" value="{{ agent.bank_ifsc_code|default:'' }}"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200">
+                        <button type="button" 
+                                onclick="window.history.back()"
+                                class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-md font-medium transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" 
+                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium transition-colors">
+                            Request Payout
+                        </button>
+                    </div>
+                </form>
+                {% else %}
+                <div class="text-center py-8">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h6m-6 4h6m2 5H7a2 2 0 01-2-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">Minimum Payout Not Reached</h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                        You need to accumulate at least ${{ agent.minimum_payout_threshold|floatformat:2 }} in pending payouts to request a payout.
+                    </p>
+                    <p class="mt-2 text-sm text-gray-900">
+                        Current pending: ${{ stats.pending_payout|floatformat:2 }}
+                    </p>
+                    <p class="mt-1 text-sm text-gray-900">
+                        Amount needed: ${{ agent.minimum_payout_threshold|sub:stats.pending_payout|floatformat:2 }}
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Payout History -->
+        <div class="bg-white rounded-lg shadow mt-8">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Payout History</h2>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Date
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Amount
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Method
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Status
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for payout in payout_history %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ payout.date|date:"M d, Y" }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                ${{ payout.amount|floatformat:2 }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ payout.get_method_display }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                    {% if payout.status == 'completed' %}bg-green-100 text-green-800
+                                    {% elif payout.status == 'pending' %}bg-yellow-100 text-yellow-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ payout.get_status_display }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                {% if payout.status == 'completed' %}
+                                <a href="#" class="text-blue-600 hover:text-blue-800">
+                                    Download Receipt
+                                </a>
+                                {% else %}
+                                <span class="text-gray-400">-</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                {% if not payout_history %}
+                <div class="text-center py-8">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2z" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No payout history</h3>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Your payout history will appear here once you start receiving payments.
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

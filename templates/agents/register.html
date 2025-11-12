@@ -1,0 +1,385 @@
+{% extends 'base.html' %}
+{% block title %}Agent Registration - Travel Marketplace{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-3xl">
+        <div class="text-center">
+            <h2 class="text-3xl font-extrabold text-gray-900">Become a Travel Agent</h2>
+            <p class="mt-2 text-gray-600">
+                Join our network of verified travel agents and start earning commissions
+            </p>
+        </div>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-3xl">
+        <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="mb-4 p-4 rounded-md {% if message.tags == 'error' %}bg-red-50 text-red-700{% else %}bg-green-50 text-green-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form class="space-y-6" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Company Information -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Company Information</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="company_name" class="block text-sm font-medium text-gray-700">
+                                Company Name <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="text" name="company_name" id="company_name" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="company_type" class="block text-sm font-medium text-gray-700">
+                                Company Type <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <select name="company_type" id="company_type" required
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <option value="">Select company type</option>
+                                    <option value="individual">Individual</option>
+                                    <option value="partnership">Partnership</option>
+                                    <option value="private_limited">Private Limited</option>
+                                    <option value="public_limited">Public Limited</option>
+                                    <option value="llp">LLP</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="registration_number" class="block text-sm font-medium text-gray-700">
+                                Registration Number <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="text" name="registration_number" id="registration_number" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="established_year" class="block text-sm font-medium text-gray-700">
+                                Established Year <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="number" name="established_year" id="established_year" 
+                                       min="1900" max="{{ current_year }}" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="contact_person" class="block text-sm font-medium text-gray-700">
+                                Contact Person <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="text" name="contact_person" id="contact_person" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="contact_email" class="block text-sm font-medium text-gray-700">
+                                Contact Email <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="email" name="contact_email" id="contact_email" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="contact_phone" class="block text-sm font-medium text-gray-700">
+                                Contact Phone <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="tel" name="contact_phone" id="contact_phone" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="website" class="block text-sm font-medium text-gray-700">
+                                Website
+                            </label>
+                            <div class="mt-1">
+                                <input type="url" name="website" id="website"
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <label for="company_description" class="block text-sm font-medium text-gray-700">
+                            Company Description <span class="text-red-500">*</span>
+                        </label>
+                        <div class="mt-1">
+                            <textarea name="company_description" id="company_description" rows="4" required
+                                      class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Information -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Address Information</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="address_line1" class="block text-sm font-medium text-gray-700">
+                                Address Line 1 <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="text" name="address_line1" id="address_line1" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="address_line2" class="block text-sm font-medium text-gray-700">
+                                Address Line 2
+                            </label>
+                            <div class="mt-1">
+                                <input type="text" name="address_line2" id="address_line2"
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="city" class="block text-sm font-medium text-gray-700">
+                                City <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="text" name="city" id="city" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="state" class="block text-sm font-medium text-gray-700">
+                                State <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="text" name="state" id="state" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="postal_code" class="block text-sm font-medium text-gray-700">
+                                Postal Code <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="text" name="postal_code" id="postal_code" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="country" class="block text-sm font-medium text-gray-700">
+                                Country <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="text" name="country" id="country" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Specializations -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Specializations</h3>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="flex items-center">
+                            <input type="checkbox" name="specializations" value="flights" id="spec_flights"
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="spec_flights" class="ml-2 block text-sm text-gray-700">
+                                Flights
+                            </label>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input type="checkbox" name="specializations" value="hotels" id="spec_hotels"
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="spec_hotels" class="ml-2 block text-sm text-gray-700">
+                                Hotels
+                            </label>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input type="checkbox" name="specializations" value="packages" id="spec_packages"
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="spec_packages" class="ml-2 block text-sm text-gray-700">
+                                Tour Packages
+                            </label>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input type="checkbox" name="specializations" value="visa" id="spec_visa"
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="spec_visa" class="ml-2 block text-sm text-gray-700">
+                                Visa Services
+                            </label>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input type="checkbox" name="specializations" value="insurance" id="spec_insurance"
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="spec_insurance" class="ml-2 block text-sm text-gray-700">
+                                Travel Insurance
+                            </label>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input type="checkbox" name="specializations" value="corporate" id="spec_corporate"
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label for="spec_corporate" class="ml-2 block text-sm text-gray-700">
+                                Corporate Travel
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Document Upload -->
+                <div class="border-b border-gray-200 pb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Document Upload</h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label for="gst_certificate" class="block text-sm font-medium text-gray-700">
+                                GST Certificate <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="file" name="gst_certificate" id="gst_certificate" 
+                                       accept=".pdf,.jpg,.jpeg,.png" required
+                                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Upload GST certificate (PDF, JPG, PNG)</p>
+                        </div>
+
+                        <div>
+                            <label for="pan_card" class="block text-sm font-medium text-gray-700">
+                                PAN Card <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="file" name="pan_card" id="pan_card" 
+                                       accept=".pdf,.jpg,.jpeg,.png" required
+                                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Upload PAN card (PDF, JPG, PNG)</p>
+                        </div>
+
+                        <div>
+                            <label for="trade_license" class="block text-sm font-medium text-gray-700">
+                                Trade License <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="file" name="trade_license" id="trade_license" 
+                                       accept=".pdf,.jpg,.jpeg,.png" required
+                                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Upload trade license (PDF, JPG, PNG)</p>
+                        </div>
+
+                        <div>
+                            <label for="iata_certificate" class="block text-sm font-medium text-gray-700">
+                                IATA Certificate (if applicable)
+                            </label>
+                            <div class="mt-1">
+                                <input type="file" name="iata_certificate" id="iata_certificate" 
+                                       accept=".pdf,.jpg,.jpeg,.png"
+                                       class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Upload IATA certificate if available (PDF, JPG, PNG)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Information -->
+                <div class="pb-6">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Account Information</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="username" class="block text-sm font-medium text-gray-700">
+                                Username <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="text" name="username" id="username" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="email" class="block text-sm font-medium text-gray-700">
+                                Email Address <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="email" name="email" id="email" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700">
+                                Password <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="password" name="password" id="password" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="confirm_password" class="block text-sm font-medium text-gray-700">
+                                Confirm Password <span class="text-red-500">*</span>
+                            </label>
+                            <div class="mt-1">
+                                <input type="password" name="confirm_password" id="confirm_password" required
+                                       class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms and Conditions -->
+                <div class="pb-6">
+                    <div class="flex items-center">
+                        <input type="checkbox" name="terms_accepted" id="terms_accepted" required
+                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="terms_accepted" class="ml-2 block text-sm text-gray-700">
+                            I agree to the <a href="#" class="text-blue-600 hover:text-blue-800">Terms and Conditions</a> 
+                            and <a href="#" class="text-blue-600 hover:text-blue-800">Privacy Policy</a> <span class="text-red-500">*</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end space-x-4">
+                    <button type="button" 
+                            onclick="window.location.href='{% url 'pages:home' %}'"
+                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-2 rounded-md font-medium transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
+                        Submit Application
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

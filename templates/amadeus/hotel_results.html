@@ -1,0 +1,603 @@
+{% extends 'base.html' %}
+{% block title %}Hotel Results - Travel Marketplace{% endblock %}
+
+{% block extra_css %}
+<style>
+.hotel-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    overflow: hidden;
+    height: 100%;
+}
+
+.hotel-card:hover {
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.hotel-card.selected {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.hotel-image {
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.hotel-card:hover .hotel-image {
+    transform: scale(1.05);
+}
+
+.rating-stars {
+    color: #fbbf24;
+}
+
+.price-highlight {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #059669;
+}
+
+.amenity-badge {
+    background: #f3f4f6;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    margin: 2px;
+}
+
+.filter-sidebar {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 20px;
+    position: sticky;
+    top: 20px;
+}
+
+.price-slider {
+    margin: 20px 0;
+}
+
+.map-container {
+    height: 400px;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.hotel-summary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.board-type-badge {
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+
+.distance-badge {
+    background: #dcfce7;
+    color: #166534;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.hotel-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.sort-dropdown {
+    min-width: 200px;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 10px;
+}
+
+.view-toggle button {
+    padding: 8px 12px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    border-radius: 6px;
+}
+
+.view-toggle button.active {
+    background: #4f46e5;
+    color: white;
+    border-color: #4f46e5;
+}
+
+.grid-view {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.list-view .hotel-card {
+    display: flex;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.list-view .hotel-image-container {
+    width: 300px;
+    flex-shrink: 0;
+}
+
+.list-view .hotel-content {
+    flex: 1;
+    padding: 20px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Hotel Search Summary -->
+    <div class="hotel-summary">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="h3 mb-2">
+                    Hotels in <strong>{{ search.city_code }}</strong>
+                </h1>
+                <p class="mb-0">
+                    {{ search.check_in_date|date:"F j" }} - {{ search.check_out_date|date:"F j, Y" }}
+                    • {{ search.adults }} Adult{{ search.adults|pluralize }}
+                    {% if search.children %}• {{ search.children }} Child{{ search.children|pluralize }}{% endif %}
+                    • {{ search.room_quantity }} Room{{ search.room_quantity|pluralize }}
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <div class="text-muted">{{ offers.count }} hotels found</div>
+                <a href="{% url 'amadeus:hotel_search' %}" class="btn btn-light btn-sm">
+                    <i class="fas fa-search me-2"></i>Modify Search
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Filters Sidebar -->
+        <div class="col-lg-3">
+            <div class="filter-sidebar">
+                <h5 class="mb-4">Filters</h5>
+                
+                <!-- Price Range -->
+                <div class="mb-4">
+                    <label class="form-label">Price Range (per night)</label>
+                    <div class="price-slider">
+                        <input type="range" class="form-range" id="priceRange" 
+                               min="{{ min_price }}" max="{{ max_price }}" 
+                               value="{{ max_price }}" step="10">
+                        <div class="d-flex justify-content-between">
+                            <span>${{ min_price|int }}</span>
+                            <span id="maxPriceLabel">${{ max_price|int }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Star Rating -->
+                <div class="mb-4">
+                    <label class="form-label">Star Rating</label>
+                    {% for rating in ratings %}
+                    <div class="form-check">
+                        <input class="form-check-input rating-filter" type="checkbox" 
+                               value="{{ rating }}" checked>
+                        <label class="form-check-label" for="rating{{ rating }}">
+                            {% for i in rating|range %}<i class="fas fa-star text-warning"></i>{% endfor %}
+                            {% for i in 5|range_rev:rating %}<i class="far fa-star text-warning"></i>{% endfor %}
+                            {{ rating }} stars
+                        </label>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Board Type -->
+                <div class="mb-4">
+                    <label class="form-label">Board Type</label>
+                    <div class="form-check">
+                        <input class="form-check-input board-filter" type="checkbox" 
+                               value="ROOM_ONLY" checked>
+                        <label class="form-check-label">Room Only</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input board-filter" type="checkbox" 
+                               value="BREAKFAST" checked>
+                        <label class="form-check-label">Breakfast Included</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input board-filter" type="checkbox" 
+                               value="HALF_BOARD" checked>
+                        <label class="form-check-label">Half Board</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input board-filter" type="checkbox" 
+                               value="FULL_BOARD" checked>
+                        <label class="form-check-label">Full Board</label>
+                    </div>
+                </div>
+                
+                <!-- Amenities -->
+                <div class="mb-4">
+                    <label class="form-label">Amenities</label>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        <div class="form-check">
+                            <input class="form-check-input amenity-filter" type="checkbox" 
+                                   value="POOL" checked>
+                            <label class="form-check-label">Swimming Pool</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input amenity-filter" type="checkbox" 
+                                   value="WIFI" checked>
+                            <label class="form-check-label">Free WiFi</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input amenity-filter" type="checkbox" 
+                                   value="PARKING" checked>
+                            <label class="form-check-label">Parking</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input amenity-filter" type="checkbox" 
+                                   value="GYM" checked>
+                            <label class="form-check-label">Fitness Center</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input amenity-filter" type="checkbox" 
+                                   value="SPA" checked>
+                            <label class="form-check-label">Spa</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input amenity-filter" type="checkbox" 
+                                   value="RESTAURANT" checked>
+                            <label class="form-check-label">Restaurant</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Refundable -->
+                <div class="mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="refundableOnly">
+                        <label class="form-check-label" for="refundableOnly">
+                            Refundable Only
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Reset Filters -->
+                <button class="btn btn-outline-secondary btn-sm w-100" onclick="resetFilters()">
+                    <i class="fas fa-undo me-2"></i>Reset Filters
+                </button>
+            </div>
+        </div>
+        
+        <!-- Results -->
+        <div class="col-lg-9">
+            <!-- Sort and View Options -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="text-muted">Showing <span id="resultCount">{{ offers.count }}</span> hotels</div>
+                <div class="d-flex align-items-center gap-3">
+                    <!-- View Toggle -->
+                    <div class="view-toggle">
+                        <button class="active" onclick="setView('grid')">
+                            <i class="fas fa-th"></i>
+                        </button>
+                        <button onclick="setView('list')">
+                            <i class="fas fa-list"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Sort Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-sort me-2"></i>Sort by
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" onclick="sortHotels('price')">Price (Low to High)</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="sortHotels('price_desc')">Price (High to Low)</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="sortHotels('rating')">Rating (Highest)</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="sortHotels('distance')">Distance (Nearest)</a></li>
+                            <li><a class="dropdown-item" href="#" onclick="sortHotels('name')">Name (A-Z)</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hotel Cards -->
+            <div id="hotelResults" class="grid-view">
+                {% for offer in offers %}
+                <div class="hotel-card" 
+                     data-price="{{ offer.price_per_night }}"
+                     data-rating="{{ offer.hotel.rating|default:0 }}"
+                     data-board-type="{{ offer.board_type }}"
+                     data-amenities="{{ offer.hotel.amenities|join:',' }}"
+                     data-refundable="{{ offer.is_refundable|yesno:'true,false' }}"
+                     data-hotel-id="{{ offer.id }}">
+                    
+                    <div class="hotel-image-container">
+                        <img src="https://picsum.photos/seed/{{ offer.hotel.name }}/400/200.jpg" 
+                             alt="{{ offer.hotel.name }}" 
+                             class="hotel-image w-100">
+                        
+                        <!-- Quick Actions -->
+                        <div class="position-absolute top-0 end-0 p-2">
+                            <button class="btn btn-light btn-sm rounded-circle" onclick="toggleFavorite({{ offer.id }})">
+                                <i class="far fa-heart"></i>
+                            </button>
+                        </div>
+                        
+                        <!-- Rating Badge -->
+                        {% if offer.hotel.rating %}
+                        <div class="position-absolute top-0 start-0 m-2">
+                            <div class="bg-dark text-white px-2 py-1 rounded">
+                                <i class="fas fa-star text-warning"></i>
+                                {{ offer.hotel.rating|floatformat:1 }}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h5 class="card-title mb-0">{{ offer.hotel.name }}</h5>
+                            <div class="text-end">
+                                <div class="price-highlight">${{ offer.price_per_night }}</div>
+                                <div class="text-muted small">per night</div>
+                            </div>
+                        </div>
+                        
+                        <div class="text-muted small mb-2">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            {{ offer.hotel.city }}, {{ offer.hotel.country }}
+                        </div>
+                        
+                        <!-- Board Type -->
+                        {% if offer.board_type %}
+                        <span class="board-type-badge me-2">{{ offer.get_board_type_display }}</span>
+                        {% endif %}
+                        
+                        <!-- Refundable Badge -->
+                        {% if offer.is_refundable %}
+                        <span class="badge bg-success me-2">Refundable</span>
+                        {% endif %}
+                        
+                        <!-- Amenities -->
+                        <div class="hotel-features mt-2">
+                            {% for amenity in offer.hotel.amenities|slice:":4" %}
+                            <span class="amenity-badge">{{ amenity }}</span>
+                            {% endfor %}
+                            {% if offer.hotel.amenities|length > 4 %}
+                            <span class="amenity-badge">+{{ offer.hotel.amenities|length|add:"-4" }} more</span>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="d-grid gap-2 mt-3">
+                            <button class="btn btn-primary" onclick="selectHotel({{ offer.id }})">
+                                Select Hotel
+                            </button>
+                            <a href="{% url 'amadeus:hotel_detail' offer.id %}" 
+                               class="btn btn-outline-secondary btn-sm">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- No Results Message -->
+            <div id="noResults" class="text-center py-8" style="display: none;">
+                <i class="fas fa-hotel text-muted" style="font-size: 4rem;"></i>
+                <h4 class="mt-4">No hotels found</h4>
+                <p class="text-muted">Try adjusting your filters or search criteria</p>
+                <button class="btn btn-primary" onclick="resetFilters()">Reset Filters</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay" style="display: none;">
+    <div class="text-center">
+        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <div class="mt-3">Processing your selection...</div>
+    </div>
+</div>
+
+<script>
+let selectedHotelId = null;
+let currentView = 'grid';
+
+// Price range slider
+document.getElementById('priceRange').addEventListener('input', function() {
+    document.getElementById('maxPriceLabel').textContent = '$' + this.value;
+    applyFilters();
+});
+
+// View toggle
+function setView(view) {
+    currentView = view;
+    const container = document.getElementById('hotelResults');
+    const buttons = document.querySelectorAll('.view-toggle button');
+    
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    if (view === 'list') {
+        container.classList.remove('grid-view');
+        container.classList.add('list-view');
+    } else {
+        container.classList.remove('list-view');
+        container.classList.add('grid-view');
+    }
+}
+
+// Filter functions
+function applyFilters() {
+    const maxPrice = parseFloat(document.getElementById('priceRange').value);
+    const selectedRatings = Array.from(document.querySelectorAll('.rating-filter:checked'))
+        .map(cb => parseFloat(cb.value));
+    const selectedBoardTypes = Array.from(document.querySelectorAll('.board-filter:checked'))
+        .map(cb => cb.value);
+    const selectedAmenities = Array.from(document.querySelectorAll('.amenity-filter:checked'))
+        .map(cb => cb.value);
+    const refundableOnly = document.getElementById('refundableOnly').checked;
+    
+    const hotelCards = document.querySelectorAll('.hotel-card');
+    let visibleCount = 0;
+    
+    hotelCards.forEach(card => {
+        let show = true;
+        
+        // Price filter
+        if (parseFloat(card.dataset.price) > maxPrice) {
+            show = false;
+        }
+        
+        // Rating filter
+        const rating = parseFloat(card.dataset.rating);
+        if (selectedRatings.length > 0 && !selectedRatings.includes(rating)) {
+            show = false;
+        }
+        
+        // Board type filter
+        const boardType = card.dataset.boardType;
+        if (selectedBoardTypes.length > 0 && !selectedBoardTypes.includes(boardType)) {
+            show = false;
+        }
+        
+        // Amenities filter
+        const hotelAmenities = card.dataset.amenities.split(',');
+        const hasRequiredAmenities = selectedAmenities.every(amenity => 
+            hotelAmenities.includes(amenity)
+        );
+        if (selectedAmenities.length > 0 && !hasRequiredAmenities) {
+            show = false;
+        }
+        
+        // Refundable filter
+        if (refundableOnly && card.dataset.refundable === 'false') {
+            show = false;
+        }
+        
+        card.style.display = show ? 'block' : 'none';
+        if (show) visibleCount++;
+    });
+    
+    // Update result count
+    document.getElementById('resultCount').textContent = visibleCount;
+    
+    // Show/hide no results message
+    document.getElementById('noResults').style.display = visibleCount === 0 ? 'block' : 'none';
+}
+
+function resetFilters() {
+    document.getElementById('priceRange').value = {{ max_price }};
+    document.getElementById('maxPriceLabel').textContent = '${{ max_price|int }}';
+    
+    document.querySelectorAll('.rating-filter, .board-filter, .amenity-filter').forEach(cb => cb.checked = true);
+    document.getElementById('refundableOnly').checked = false;
+    
+    applyFilters();
+}
+
+function sortHotels(sortBy) {
+    const container = document.getElementById('hotelResults');
+    const cards = Array.from(container.querySelectorAll('.hotel-card'));
+    
+    cards.sort((a, b) => {
+        switch(sortBy) {
+            case 'price':
+                return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+            case 'price_desc':
+                return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+            case 'rating':
+                return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
+            case 'name':
+                return a.textContent.localeCompare(b.textContent);
+            case 'distance':
+                // For distance, we'd need actual distance data
+                return parseFloat(a.dataset.price) - parseFloat(b.dataset.price); // Fallback
+            default:
+                return 0;
+        }
+    });
+    
+    // Re-append sorted cards
+    cards.forEach(card => container.appendChild(card));
+}
+
+function selectHotel(offerId) {
+    // Remove previous selection
+    document.querySelectorAll('.hotel-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    // Add selection to clicked card
+    const selectedCard = document.querySelector(`[data-hotel-id="${offerId}"]`);
+    selectedCard.classList.add('selected');
+    
+    selectedHotelId = offerId;
+    
+    // Show loading
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    
+    // Redirect to booking page after a short delay
+    setTimeout(() => {
+        window.location.href = `/bookings/create/${offerId}/`;
+    }, 1500);
+}
+
+function toggleFavorite(hotelId) {
+    // Toggle favorite status
+    const heart = event.currentTarget.querySelector('i');
+    if (heart.classList.contains('far')) {
+        heart.classList.remove('far');
+        heart.classList.add('fas');
+        // Add to favorites logic here
+    } else {
+        heart.classList.remove('fas');
+        heart.classList.add('far');
+        // Remove from favorites logic here
+    }
+}
+
+// Event listeners for filters
+document.querySelectorAll('.rating-filter, .board-filter, .amenity-filter, #refundableOnly').forEach(element => {
+    element.addEventListener('change', applyFilters);
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    applyFilters();
+});
+</script>
+{% endblock %}
