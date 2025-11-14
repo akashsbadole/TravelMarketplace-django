@@ -337,3 +337,102 @@ class FAQ(models.Model):
         else:
             self.not_helpful_count += 1
         self.save()
+
+class Destination(models.Model):
+    """Travel destination model for storing destination information"""
+    
+    REGION_CHOICES = [
+        ('europe', 'Europe'),
+        ('asia', 'Asia'),
+        ('americas', 'Americas'),
+        ('africa', 'Africa'),
+        ('oceania', 'Oceania'),
+        ('middle_east', 'Middle East'),
+    ]
+    
+    SEASON_CHOICES = [
+        ('spring', 'Spring'),
+        ('summer', 'Summer'),
+        ('autumn', 'Autumn'),
+        ('winter', 'Winter'),
+        ('all_year', 'All Year Round'),
+    ]
+    
+    PRICE_RANGE_CHOICES = [
+        ('budget', 'Budget ($)'),
+        ('moderate', 'Moderate ($$)'),
+        ('premium', 'Premium ($$$)'),
+        ('luxury', 'Luxury ($$$$)'),
+    ]
+    
+    # Basic Information
+    name = models.CharField(max_length=100, help_text="Destination name")
+    slug = models.SlugField(max_length=100, unique=True, help_text="URL-friendly version of the name")
+    description = models.TextField(help_text="Detailed description of the destination")
+    country = models.CharField(max_length=100, help_text="Country name")
+    city = models.CharField(max_length=100, blank=True, help_text="City name (if applicable)")
+    region = models.CharField(max_length=20, choices=REGION_CHOICES, help_text="Geographical region")
+    
+    # Media
+    image_url = models.URLField(max_length=500, help_text="URL to destination image")
+    gallery_images = models.JSONField(default=list, blank=True, help_text="List of additional image URLs")
+    
+    # Travel Information
+    popular_attractions = models.JSONField(default=list, help_text="List of popular attractions")
+    best_time_to_visit = models.CharField(max_length=20, choices=SEASON_CHOICES, help_text="Best season to visit")
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.0, help_text="Average rating (0-5)")
+    price_range = models.CharField(max_length=20, choices=PRICE_RANGE_CHOICES, help_text="Price range category")
+    
+    # Statistics
+    requirements_count = models.PositiveIntegerField(default=0, help_text="Number of travel requirements for this destination")
+    view_count = models.PositiveIntegerField(default=0, help_text="Number of views")
+    
+    # Status and Featured
+    is_featured = models.BooleanField(default=False, help_text="Whether this destination is featured")
+    is_active = models.BooleanField(default=True, help_text="Whether this destination is active")
+    
+    # Timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-is_featured', '-average_rating', 'name']
+        verbose_name_plural = 'Destinations'
+        indexes = [
+            models.Index(fields=['slug']),
+            models.Index(fields=['country']),
+            models.Index(fields=['region']),
+            models.Index(fields=['is_featured']),
+            models.Index(fields=['is_active']),
+        ]
+    
+    def __str__(self):
+        return f"{self.name}, {self.country}"
+    
+    def get_absolute_url(self):
+        return f"/destinations/{self.slug}/"
+    
+    def increment_views(self):
+        """Increment view count"""
+        self.view_count += 1
+        self.save(update_fields=['view_count'])
+    
+    def update_rating(self):
+        """Update average rating based on reviews"""
+        # This would typically be calculated from related reviews
+        # For now, we'll keep the current value
+        pass
+    
+    def get_price_display(self):
+        """Get formatted price range display"""
+        price_symbols = {
+            'budget': '$',
+            'moderate': '$$',
+            'premium': '$$$',
+            'luxury': '$$$$',
+        }
+        return price_symbols.get(self.price_range, '$$$')
+    
+    def get_season_display(self):
+        """Get formatted best time to visit"""
+        return dict(self.SEASON_CHOICES).get(self.best_time_to_visit, 'All Year Round')

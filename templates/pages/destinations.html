@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load math_filters %}
 {% block title %}Destinations - Travel Marketplace{% endblock %}
 
 {% block content %}
@@ -21,68 +22,95 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Search and Filter -->
         <div class="mb-12">
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search Destinations</label>
-                        <input type="text" id="search" name="search" placeholder="Enter destination name..." 
-                               class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+            <form method="GET" action="{% url 'pages:destinations' %}">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search Destinations</label>
+                            <input type="text" id="search" name="search" value="{{ current_search }}" placeholder="Enter destination name..." 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label for="region" class="block text-sm font-medium text-gray-700 mb-2">Region</label>
+                            <select id="region" name="region" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                                <option value="">All Regions</option>
+                                {% for region_value, region_label in regions %}
+                                <option value="{{ region_value }}" {% if current_region == region_value %}selected{% endif %}>{{ region_label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label for="sort" class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+                            <select id="sort" name="sort" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                                <option value="popular" {% if current_sort == 'popular' %}selected{% endif %}>Most Popular</option>
+                                <option value="name" {% if current_sort == 'name' %}selected{% endif %}>Name</option>
+                                <option value="requirements" {% if current_sort == 'requirements' %}selected{% endif %}>Most Requirements</option>
+                                <option value="rating" {% if current_sort == 'rating' %}selected{% endif %}>Highest Rated</option>
+                            </select>
+                        </div>
                     </div>
-                    <div>
-                        <label for="region" class="block text-sm font-medium text-gray-700 mb-2">Region</label>
-                        <select id="region" name="region" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">All Regions</option>
-                            <option value="europe">Europe</option>
-                            <option value="asia">Asia</option>
-                            <option value="americas">Americas</option>
-                            <option value="africa">Africa</option>
-                            <option value="oceania">Oceania</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="sort" class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
-                        <select id="sort" name="sort" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-                            <option value="popular">Most Popular</option>
-                            <option value="name">Name</option>
-                            <option value="requirements">Most Requirements</option>
-                        </select>
+                    <div class="mt-4">
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
+                            <i class="fas fa-search mr-2"></i>Search Destinations
+                        </button>
+                        <a href="{% url 'pages:destinations' %}" class="ml-2 text-gray-600 hover:text-gray-800">
+                            <i class="fas fa-times-circle mr-1"></i>Clear Filters
+                        </a>
                     </div>
                 </div>
-                <div class="mt-4">
-                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
-                        <i class="fas fa-search mr-2"></i>Search Destinations
-                    </button>
-                </div>
-            </div>
+            </form>
         </div>
 
         <!-- Destinations List -->
+        {% if destinations %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {% for destination in destinations %}
             <div class="bg-white rounded-lg shadow-lg overflow-hidden hover-scale cursor-pointer">
-                <div class="relative h-48 bg-gradient-to-br from-blue-400 to-blue-600">
-                    <img src="https://picsum.photos/seed/{{ destination.name }}/400/300.jpg" 
-                         alt="{{ destination.name }}" 
-                         class="w-full h-full object-cover opacity-80">
-                    <div class="absolute inset-0 flex items-center justify-center">
-                        <h3 class="text-2xl font-bold text-white">{{ destination.name }}</h3>
+                <a href="{{ destination.get_absolute_url }}" class="block">
+                    <div class="relative h-48 bg-gradient-to-br from-blue-400 to-blue-600">
+                        <img src="{{ destination.image_url }}" 
+                             alt="{{ destination.name }}" 
+                             class="w-full h-full object-cover opacity-80"
+                             onerror="this.src='https://picsum.photos/seed/{{ destination.name }}/400/300.jpg'">
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <h3 class="text-2xl font-bold text-white drop-shadow-lg">{{ destination.name }}</h3>
+                        </div>
+                        {% if destination.is_featured %}
+                        <div class="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-semibold">
+                            <i class="fas fa-star mr-1"></i>Featured
+                        </div>
+                        {% endif %}
                     </div>
-                </div>
+                </a>
                 <div class="p-6">
                     <p class="text-gray-600 mb-2">
-                        <i class="fas fa-map-marker-alt mr-2"></i>{{ destination.country }}
+                        <i class="fas fa-map-marker-alt mr-2"></i>{{ destination.country }}{% if destination.city %}, {{ destination.city }}{% endif %}
+                    </p>
+                    <p class="text-gray-600 mb-2">
+                        <i class="fas fa-calendar-alt mr-2"></i>Best time: {{ destination.get_season_display }}
                     </p>
                     <p class="text-gray-600 mb-4">
-                        <i class="fas fa-users mr-2"></i>{{ destination.count }}+ travel requirements
+                        <i class="fas fa-users mr-2"></i>{{ destination.requirements_count }}+ travel requirements
                     </p>
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
+                            {% with '★'|ljust:destination.average_rating|floor as stars %}
                             {% for i in '12345' %}
-                                <i class="fas fa-star text-yellow-400"></i>
+                                {% if forloop.counter <= destination.average_rating|floor %}
+                                    <i class="fas fa-star text-yellow-400"></i>
+                                {% else %}
+                                    <i class="far fa-star text-yellow-400"></i>
+                                {% endif %}
                             {% endfor %}
-                            <span class="text-gray-600 text-sm">(4.8)</span>
+                            {% endwith %}
+                            <span class="text-gray-600 text-sm">({{ destination.average_rating }})</span>
                         </div>
-                        <a href="#" class="text-blue-600 hover:text-blue-700 font-medium">
+                        <div class="text-sm font-medium text-gray-700">
+                            {{ destination.get_price_display }}
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{{ destination.get_absolute_url }}" class="text-blue-600 hover:text-blue-700 font-medium">
                             Explore →
                         </a>
                     </div>
@@ -90,13 +118,25 @@
             </div>
             {% endfor %}
         </div>
+        {% else %}
+        <div class="text-center py-12">
+            <i class="fas fa-search text-gray-400 text-5xl mb-4"></i>
+            <h3 class="text-xl font-semibold text-gray-700 mb-2">No destinations found</h3>
+            <p class="text-gray-500 mb-6">Try adjusting your search or filters to find what you're looking for.</p>
+            <a href="{% url 'pages:destinations' %}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md font-medium transition-colors">
+                View All Destinations
+            </a>
+        </div>
+        {% endif %}
 
-        <!-- Load More -->
+        <!-- Load More (for future pagination) -->
+        {% if destinations %}
         <div class="text-center mt-12">
             <button class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors">
                 Load More Destinations
             </button>
         </div>
+        {% endif %}
     </div>
 </section>
 

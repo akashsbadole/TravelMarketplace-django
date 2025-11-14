@@ -6,7 +6,8 @@
     <title>{% block title %}Travel Marketplace{% endblock %}</title>
 
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
 
     <!-- Font Awesome -->
     <link
@@ -14,48 +15,7 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
     />
 
-    <!-- Custom CSS -->
-    <style>
-      /* Custom animations and styles */
-      .fade-in {
-        animation: fadeIn 0.3s ease-in;
-      }
-
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-
-      .hover-scale {
-        transition: transform 0.2s ease;
-      }
-
-      .hover-scale:hover {
-        transform: scale(1.05);
-      }
-
-      /* Custom scrollbar */
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 8px;
-      }
-
-      .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f1f1;
-      }
-
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #888;
-        border-radius: 4px;
-      }
-
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #555;
-      }
-    </style>
+    <!-- Custom CSS is now included in the compiled Tailwind CSS file -->
 
     {% block extra_css %}{% endblock %}
   </head>
@@ -123,7 +83,7 @@
                   0
                 </span>
               </button>
-              
+
               <!-- Notification Dropdown -->
               <div
                 class="hidden absolute right-0 mt-2 w-80 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
@@ -132,8 +92,13 @@
                 <div class="py-2">
                   <div class="px-4 py-2 border-b border-gray-100">
                     <div class="flex items-center justify-between">
-                      <h3 class="text-sm font-medium text-gray-900">Notifications</h3>
-                      <a href="{% url 'notifications:list' %}" class="text-xs text-blue-600 hover:text-blue-800">
+                      <h3 class="text-sm font-medium text-gray-900">
+                        Notifications
+                      </h3>
+                      <a
+                        href="{% url 'notifications:list' %}"
+                        class="text-xs text-blue-600 hover:text-blue-800"
+                      >
                         View all
                       </a>
                     </div>
@@ -464,43 +429,49 @@
       htmx.config.globalEvaluations = true;
 
       // Notification dropdown functionality
-      const notificationButton = document.getElementById('notification-button');
-      const notificationDropdown = document.getElementById('notification-dropdown');
-      const notificationList = document.getElementById('notification-list');
-      const notificationBadge = document.getElementById('notification-badge');
-      const messagesBadge = document.getElementById('messages-badge');
+      const notificationButton = document.getElementById("notification-button");
+      const notificationDropdown = document.getElementById(
+        "notification-dropdown"
+      );
+      const notificationList = document.getElementById("notification-list");
+      const notificationBadge = document.getElementById("notification-badge");
+      const messagesBadge = document.getElementById("messages-badge");
 
       if (notificationButton) {
-        notificationButton.addEventListener('click', function(e) {
+        notificationButton.addEventListener("click", function (e) {
           e.stopPropagation();
-          notificationDropdown.classList.toggle('hidden');
-          
+          notificationDropdown.classList.toggle("hidden");
+
           // Load notifications when opening
-          if (!notificationDropdown.classList.contains('hidden')) {
+          if (!notificationDropdown.classList.contains("hidden")) {
             loadNotifications();
           }
         });
       }
 
       // Close dropdown when clicking outside
-      document.addEventListener('click', function(event) {
-        if (notificationDropdown && !notificationDropdown.contains(event.target) && !notificationButton.contains(event.target)) {
-          notificationDropdown.classList.add('hidden');
+      document.addEventListener("click", function (event) {
+        if (
+          notificationDropdown &&
+          !notificationDropdown.contains(event.target) &&
+          !notificationButton.contains(event.target)
+        ) {
+          notificationDropdown.classList.add("hidden");
         }
       });
 
       // Load notifications function
       function loadNotifications() {
-        fetch('/notifications/api/get-unread-count/')
-          .then(response => response.json())
-          .then(data => {
+        fetch("/notifications/api/get-unread-count/")
+          .then((response) => response.json())
+          .then((data) => {
             updateNotificationBadge(data.unread_count);
-            
+
             if (data.unread_count > 0) {
               // Load recent notifications
-              fetch('/notifications/list/')
-                .then(response => response.text())
-                .then(html => {
+              fetch("/notifications/list/")
+                .then((response) => response.text())
+                .then((html) => {
                   // This would need to be implemented as an API endpoint
                   // For now, just show a message
                   notificationList.innerHTML = `
@@ -521,8 +492,8 @@
               `;
             }
           })
-          .catch(error => {
-            console.error('Error loading notifications:', error);
+          .catch((error) => {
+            console.error("Error loading notifications:", error);
           });
       }
 
@@ -530,9 +501,9 @@
       function updateNotificationBadge(count) {
         if (count > 0) {
           notificationBadge.textContent = count;
-          notificationBadge.classList.remove('hidden');
+          notificationBadge.classList.remove("hidden");
         } else {
-          notificationBadge.classList.add('hidden');
+          notificationBadge.classList.add("hidden");
         }
       }
 
@@ -540,15 +511,18 @@
       function updateMessagesBadge(count) {
         if (count > 0) {
           messagesBadge.textContent = count;
-          messagesBadge.classList.remove('hidden');
+          messagesBadge.classList.remove("hidden");
         } else {
-          messagesBadge.classList.add('hidden');
+          messagesBadge.classList.add("hidden");
         }
       }
 
       // Poll for notifications every 30 seconds
-      setInterval(function() {
-        if (notificationDropdown && notificationDropdown.classList.contains('hidden')) {
+      setInterval(function () {
+        if (
+          notificationDropdown &&
+          notificationDropdown.classList.contains("hidden")
+        ) {
           loadNotifications();
         }
       }, 30000);

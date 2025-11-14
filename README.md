@@ -10,55 +10,45 @@ This is a comprehensive multi-vendor travel marketplace application built with D
 
 ## Features
 
-The Travel Marketplace offers a rich set of features for various user roles:
+The Travel Marketplace is equipped with a robust set of features designed to facilitate a seamless experience for customers, agents, and administrators:
 
-### Core Functionality
+### Key Functional Areas:
+- **User Management**:
+    - Secure user registration, authentication, and profile management.
+    - Role-based access control ensuring distinct functionalities for customers, agents, and admins.
+    - Agent verification and approval workflows for quality assurance.
+- **Requirements & Quotes Workflow**:
+    - **Dynamic Requirement Submission**: Customers can submit detailed travel requirements using dynamic forms that adapt to different service types (e.g., flights, hotels), including support for attachments.
+    - **Agent Quote Management**: Agents can browse open requirements, create, submit, and manage quotes through an intuitive builder with rich text editing and template capabilities.
+    - **Quote Comparison**: Customers can compare multiple quotes side-by-side to make informed decisions.
+- **Booking & Payments**:
+    - **Seamless Booking Process**: Facilitates booking finalization directly through the platform.
+    - **Payment Integration (PayPal)**: Secure processing of payments for bookings.
+    - **Commission System**: Automated calculation and management of commissions from agents (2%) and customers (1%) on successful bookings.
+    - **Transaction Tracking**: Detailed recording and status updates for all financial transactions.
+- **Dashboards & Reporting**:
+    - **Customer Dashboard**: Provides personalized views for tracking submitted requirements, managing bookings, comparing quotes, and reviewing notifications.
+    - **Agent Dashboard**: Offers insights into earnings, performance metrics, and tools for managing requirements, quotes, and bookings.
+    - **Admin Panel**: Centralized control for system overview, user and agent management, comprehensive analytics, dispute resolution, and system configuration (e.g., commission rates).
+- **Travel Search & Discovery (Amadeus API Integration)**:
+    - **Advanced Flight & Hotel Search**: Leverage Amadeus API for real-time and comprehensive flight and hotel availability and pricing.
+    - **Flight Inspiration**: Enables users to discover potential destinations based on specified origin and budget.
+    - **Airport Autocomplete**: Streamlined search experience for origin/destination inputs.
+    - **Search History & Caching**: Stores recent searches and caches API responses to improve performance and reduce redundant API calls.
+- **Notifications & Communication**:
+    - Real-time notification system to keep users informed about requirement updates, new quotes, payment statuses, and system alerts.
+    - Configurable email services for various communications.
 
-- **User Authentication**: Secure user registration, login, and profile management.
-- **Role-Based Access**: Distinct dashboards and functionalities for customers, agents, and administrators.
-- **Commission System**: Automated calculation and management of commissions from agents and customers.
-
-### Customer Features
-
-- **Requirement Submission**: Customers can submit detailed travel requirements, with dynamic forms adapting to different service types (flights, hotels, etc.). Includes support for file uploads.
-- **User Dashboard**: A personalized dashboard for customers to:
-  - View real-time statistics and analytics.
-  - Manage submitted requirements, including tracking status, editing, and archiving.
-  - Track and manage all bookings.
-  - Compare multiple quotes side-by-side from various agents.
-  - Receive and manage system notifications.
-- **Flight & Hotel Search**: Integration with Amadeus API for comprehensive flight and hotel search capabilities.
-- **Flight Inspiration**: Discover travel destinations based on budget and origin.
-- **Search History**: Keep track of past flight and hotel searches.
-
-### Agent Features
-
-- **Agent Dashboard**: A dedicated dashboard for agents to:
-  - View earnings and performance metrics (real data, replacing previous mock data).
-  - Browse and respond to customer travel requirements.
-  - Create and manage detailed travel quotes with a rich text editor and templates.
-  - Manage bookings handled by the agent.
-  - Request payouts for earned commissions.
-- **Quote Builder**: Enhanced tool to build quotes using real-time Amadeus flight and hotel data.
-
-### Administrator Features
-
-- **Admin Panel**: A centralized administrative interface for:
-  - Comprehensive system overview with key metrics and analytics.
-  - User and agent management, including verification workflows.
-  - Booking and payment tracking.
-  - Dispute resolution system.
-  - System settings management, including commission rates.
-
-### Technical & Platform Features
-
-- **RESTful API**: Built with Django REST Framework for flexible data interaction.
-- **CORS Support**: Configured for cross-origin resource sharing.
-- **Media Management**: Dedicated handling for uploaded media files.
-- **Email Services**: Configurable email backend for notifications and communication.
-- **API Keys Management**: Centralized management for Amadeus and other third-party API keys (to be moved to .env in production).
-- **Logging**: Detailed application logging for monitoring and debugging.
-- **Caching**: Implemented for API search results to reduce redundant calls and improve performance.
+### Technical Foundation & Infrastructure:
+- **Django Framework**: Built on Python's Django, ensuring a scalable, secure, and maintainable backend.
+- **Django REST Framework**: Provides a powerful, flexible toolkit for building robust Web APIs.
+- **Database**: Utilizes PostgreSQL for reliable and structured data storage.
+- **Caching (Redis)**: Implements Redis for session management, caching, and background task queues (Celery).
+- **Asynchronous Task Processing (Celery)**: Handles long-running tasks like API calls and email sending in the background.
+- **Static & Media File Management**: Optimized handling and serving of static assets and user-uploaded media.
+- **API Key Management**: Centralized and secure management of third-party API credentials.
+- **Logging & Monitoring**: Comprehensive logging (e.g., `/debug.log`) for system activities and errors, supporting integration with external monitoring tools.
+- **CORS Support**: Configured for secure cross-origin resource sharing, essential for frontend interactions.
 
 ## Deployment
 

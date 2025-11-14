@@ -1,0 +1,169 @@
+{% extends 'base.html' %} {% load math_filters %} {% block title %}{{
+destination.name }}, {{ destination.country }} - Travel Marketplace{% endblock
+%} {% block content %}
+<!-- Destination Hero Section -->
+<section class="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="relative h-96 rounded-lg overflow-hidden">
+      <img
+        src="{{ destination.image_url }}"
+        alt="{{ destination.name }}"
+        class="w-full h-full object-cover"
+        onerror="this.src='https://picsum.photos/seed/{{ destination.name }}/1200/600.jpg'"
+      />
+      <div
+        class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center"
+      >
+        <div class="text-center">
+          <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+            {{ destination.name }}
+          </h1>
+          <p class="text-xl">
+            <i class="fas fa-map-marker-alt mr-2"></i>{{ destination.country
+            }}{% if destination.city %}, {{ destination.city }}{% endif %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Destination Information -->
+<section class="py-16 bg-white">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Main Content -->
+      <div class="lg:col-span-2">
+        <!-- Description -->
+        <div class="mb-8">
+          <h2 class="text-2xl font-bold text-gray-900 mb-4">
+            About {{ destination.name }}
+          </h2>
+          <p class="text-gray-600 leading-relaxed">
+            {{ destination.description }}
+          </p>
+        </div>
+
+        <!-- Popular Attractions -->
+        <div class="mb-8">
+          <h3 class="text-xl font-bold text-gray-900 mb-4">
+            Popular Attractions
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for attraction in destination.popular_attractions %}
+            <div class="bg-gray-50 p-4 rounded-lg">
+              <h4 class="font-semibold text-gray-800">{{ attraction }}</h4>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Best Time to Visit -->
+        <div class="mb-8">
+          <h3 class="text-xl font-bold text-gray-900 mb-4">
+            Best Time to Visit
+          </h3>
+          <div class="bg-blue-50 p-4 rounded-lg inline-block">
+            <i class="fas fa-calendar-alt text-blue-600 mr-2"></i>
+            <span class="font-medium text-blue-800"
+              >{{ destination.get_season_display }}</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <div class="lg:col-span-1">
+        <!-- Rating & Price -->
+        <div class="bg-gray-50 rounded-lg p-6 mb-6">
+          <div class="mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">
+              Average Rating
+            </h3>
+            <div class="flex items-center space-x-2">
+              {% for i in '12345' %} {% if forloop.counter <=
+              destination.average_rating|floatformat:0 %}
+              <i class="fas fa-star text-yellow-400"></i>
+              {% else %}
+              <i class="far fa-star text-yellow-400"></i>
+              {% endif %} {% endfor %}
+              <span class="text-gray-600 text-sm ml-2"
+                >({{ destination.average_rating }}/5)</span
+              >
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">
+              Price Range
+            </h3>
+            <div
+              class="bg-green-100 text-green-800 px-3 py-2 rounded-full text-center font-medium"
+            >
+              {{ destination.get_price_display }}
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">
+              Travel Requirements
+            </h3>
+            <div class="text-2xl font-bold text-blue-600">
+              {{ destination.requirements_count }}+
+            </div>
+          </div>
+
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">Region</h3>
+            <div class="text-gray-700">
+              {{ destination.get_region_display }}
+            </div>
+          </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="bg-blue-600 text-white rounded-lg p-6">
+          <h3 class="text-lg font-semibold mb-3">
+            Ready to Visit {{ destination.name }}?
+          </h3>
+          <p class="mb-4">
+            Connect with expert travel agents who can help plan your perfect
+            trip to {{ destination.name }}.
+          </p>
+          <a
+            href="{% url 'requirements:create' %}"
+            class="block w-full bg-white text-blue-600 hover:bg-gray-100 px-4 py-2 rounded-md text-center font-medium transition-colors"
+          >
+            <i class="fas fa-plus-circle mr-2"></i>
+            Create Travel Requirement
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Related Destinations Section -->
+<section class="py-16 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-900">
+        Explore More Destinations
+      </h2>
+      <p class="mt-4 max-w-2xl mx-auto text-xl text-gray-600">
+        Discover other amazing destinations around the world
+      </p>
+    </div>
+
+    <div class="text-center">
+      <a
+        href="{% url 'pages:destinations' %}"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold transition-colors"
+      >
+        <i class="fas fa-globe-americas mr-2"></i>
+        Browse All Destinations
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}
